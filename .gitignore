@@ -41,3 +41,16 @@ app-example
 # generated native folders
 /ios
 /android
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+#cursor
+.cursor/
+
+.env
