@@ -1,166 +1,108 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { View, Text, FlatList, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 
-// Mock data for demonstration
 type Appointment = {
-    id: number;
+    id: string;
     petName: string;
-    owner: string;
+    ownerName: string;
     date: string;
     time: string;
-    reason: string;
+    status: 'pending' | 'confirmed' | 'cancelled';
 };
 
 const initialAppointments: Appointment[] = [
     {
-        id: 1,
-        petName: "Max",
-        owner: "John Doe",
-        date: "2024-06-10",
-        time: "10:00",
-        reason: "Vaccination",
+        id: '1',
+        petName: 'Max',
+        ownerName: 'Juan Perez',
+        date: '2024-06-15',
+        time: '10:00',
+        status: 'pending',
     },
     {
-        id: 2,
-        petName: "Bella",
-        owner: "Jane Smith",
-        date: "2024-06-11",
-        time: "14:00",
-        reason: "Checkup",
+        id: '2',
+        petName: 'Luna',
+        ownerName: 'Maria Gomez',
+        date: '2024-06-16',
+        time: '12:30',
+        status: 'confirmed',
     },
 ];
 
-const AdminAppointments: React.FC = () => {
+export default function AdminAppointmentsScreen() {
     const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
-    const [editingId, setEditingId] = useState<number | null>(null);
-    const [form, setForm] = useState<Partial<Appointment>>({});
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+    const handleConfirm = (id: string) => {
+        setAppointments(prev =>
+            prev.map(app =>
+                app.id === id ? { ...app, status: 'confirmed' } : app
+            )
+        );
     };
 
-    const handleCreate = () => {
-        if (form.petName && form.owner && form.date && form.time && form.reason) {
-            setAppointments([
-                ...appointments,
+    const handleCancel = (id: string) => {
+        Alert.alert(
+            'Cancelar cita',
+            '¿Estás seguro de cancelar esta cita?',
+            [
+                { text: 'No' },
                 {
-                    id: Date.now(),
-                    petName: form.petName,
-                    owner: form.owner,
-                    date: form.date,
-                    time: form.time,
-                    reason: form.reason,
-                } as Appointment,
-            ]);
-            setForm({});
-        }
+                    text: 'Sí',
+                    onPress: () =>
+                        setAppointments(prev =>
+                            prev.map(app =>
+                                app.id === id ? { ...app, status: 'cancelled' } : app
+                            )
+                        ),
+                },
+            ]
+        );
     };
 
-    const handleEdit = (id: number) => {
-        const appt = appointments.find((a) => a.id === id);
-        if (appt) {
-            setEditingId(id);
-            setForm(appt);
-        }
-    };
-
-    const handleUpdate = () => {
-        if (
-            editingId !== null &&
-            form.petName &&
-            form.owner &&
-            form.date &&
-            form.time &&
-            form.reason
-        ) {
-            setAppointments(
-                appointments.map((a) =>
-                    a.id === editingId ? { ...a, ...form } as Appointment : a
-                )
-            );
-            setEditingId(null);
-            setForm({});
-        }
-    };
-
-    const handleCancel = () => {
-        setEditingId(null);
-        setForm({});
-    };
+    const renderItem = ({ item }: { item: Appointment }) => (
+        <View style={styles.card}>
+            <Text style={styles.title}>{item.petName} - {item.ownerName}</Text>
+            <Text>Fecha: {item.date} - Hora: {item.time}</Text>
+            <Text>Estado: {item.status}</Text>
+            <View style={styles.actions}>
+                {item.status === 'pending' && (
+                    <Button title="Confirmar" onPress={() => handleConfirm(item.id)} />
+                )}
+                {item.status !== 'cancelled' && (
+                    <Button title="Cancelar" color="red" onPress={() => handleCancel(item.id)} />
+                )}
+            </View>
+        </View>
+    );
 
     return (
-        <div style={{ maxWidth: 700, margin: "0 auto", padding: 24 }}>
-            <h1>Administrator - Appointments</h1>
-            <h2>{editingId ? "Edit Appointment" : "Create Appointment"}</h2>
-            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                <input
-                    name="petName"
-                    placeholder="Pet Name"
-                    value={form.petName || ""}
-                    onChange={handleInputChange}
-                />
-                <input
-                    name="owner"
-                    placeholder="Owner"
-                    value={form.owner || ""}
-                    onChange={handleInputChange}
-                />
-                <input
-                    name="date"
-                    type="date"
-                    value={form.date || ""}
-                    onChange={handleInputChange}
-                />
-                <input
-                    name="time"
-                    type="time"
-                    value={form.time || ""}
-                    onChange={handleInputChange}
-                />
-                <input
-                    name="reason"
-                    placeholder="Reason"
-                    value={form.reason || ""}
-                    onChange={handleInputChange}
-                />
-                {editingId ? (
-                    <>
-                        <button onClick={handleUpdate}>Update</button>
-                        <button onClick={handleCancel}>Cancel</button>
-                    </>
-                ) : (
-                    <button onClick={handleCreate}>Create</button>
-                )}
-            </div>
-            <h2>All Appointments</h2>
-            <table border={1} cellPadding={8} style={{ width: "100%" }}>
-                <thead>
-                    <tr>
-                        <th>Pet Name</th>
-                        <th>Owner</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Reason</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {appointments.map((appt) => (
-                        <tr key={appt.id}>
-                            <td>{appt.petName}</td>
-                            <td>{appt.owner}</td>
-                            <td>{appt.date}</td>
-                            <td>{appt.time}</td>
-                            <td>{appt.reason}</td>
-                            <td>
-                                <button onClick={() => handleEdit(appt.id)}>Edit</button>
-                                {/* You can add a delete button here if needed */}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+        <View style={styles.container}>
+            <Text style={styles.header}>Gestión de Citas</Text>
+            <FlatList
+                data={appointments}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+                ListEmptyComponent={<Text>No hay citas registradas.</Text>}
+            />
+            <TouchableOpacity style={styles.addButton} onPress={() => Alert.alert('Funcionalidad para agregar cita')}>
+                <Text style={styles.addButtonText}>+ Nueva Cita</Text>
+            </TouchableOpacity>
+        </View>
     );
-};
+}
 
-export default AdminAppointments;
+const styles = StyleSheet.create({
+    container: { flex: 1, padding: 16, backgroundColor: '#fff' },
+    header: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
+    card: { backgroundColor: '#f9f9f9', padding: 16, borderRadius: 8, marginBottom: 12 },
+    title: { fontSize: 18, fontWeight: 'bold' },
+    actions: { flexDirection: 'row', marginTop: 8, gap: 8 },
+    addButton: {
+        backgroundColor: '#007bff',
+        padding: 14,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    addButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+});

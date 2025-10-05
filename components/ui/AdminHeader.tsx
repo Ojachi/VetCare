@@ -12,6 +12,7 @@ export default function AdminHeader() {
 const styles = StyleSheet.create({
   header: {
     paddingVertical: 15,
+    marginTop: 40,
     backgroundColor: '#007bff',
     alignItems: 'center',
   },
