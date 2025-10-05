@@ -1,13 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { useRouter } from 'expo-router';
 import LogoutButton from '@/components/ui/LogoutButton';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const adminPaths = [
   '/(admin)/users',
   '/(admin)/all-pets',
-  '/(admin)/registrar-service',
-  '/(admin)/view-services',
+  '/(admin)/services',
   '/(admin)/admin-appointments',
   '/(admin)/medical-records',
 
@@ -34,16 +34,10 @@ const buttons: {
     path: '/(admin)/all-pets',
   },
   {
-    label: 'Registrar Servicio',
-    color: '#e67e22',
-    icon: require('../../assets/images/admin_service.png'),
-    path: '/(admin)/registrar-service',
-  },
-  {
-    label: 'Ver Servicios',
+    label: 'Gestión de Servicios',
     color: '#9b59b6',
     icon: require('../../assets/images/admin_list_service.png'),
-    path: '/(admin)/view-services',
+    path: '/(admin)/services',
   },
   {
     label: 'Citas',

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Text, Alert, StyleSheet } from 'react-native';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
-import axiosClient from '../../api/axiosClient';
-import { useSession } from '../../context/SessionContext';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
+import axiosClient from '../../api/axiosClient';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import { useSession } from '../../context/SessionContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -26,7 +26,7 @@ export default function Login() {
       // Esperamos a que el contexto verifique la cookie y actualice el estado
       await login({ email, ...response.data });
       // Aquí la navegación la maneja automáticamente el SessionContext
-    } catch (error: any) {
+    } catch {
       Alert.alert('Error', 'Credenciales inválidas');
     } finally {
       setLoading(false);

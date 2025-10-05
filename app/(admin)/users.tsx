@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
+import UserDetailContent from '../../components/admin/UserDetailContent';
 import UserList from '../../components/admin/UserList';
 import DetailModal from '../../components/ui/DetailModal';
-import UserDetailContent from '../../components/admin/UserDetailContent';
 
 type User = {
   id: number;
@@ -28,7 +28,7 @@ export default function Users() {
     try {
       const response = await axiosClient.get<User[]>('/api/admin/users');
       setUsers(response.data);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'No se pudieron cargar los usuarios');
     } finally {
       setLoading(false);
@@ -41,7 +41,7 @@ export default function Users() {
       const updatedUsers = users.map((u) => (u.id === userId ? { ...u, role: newRole } : u));
       setUsers(updatedUsers);
       Alert.alert('Éxito', 'Rol actualizado');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'No se pudo actualizar el rol');
     }
   };
@@ -53,7 +53,7 @@ export default function Users() {
       Alert.alert('Éxito', 'Usuario actualizado');
       // opcional: actualizar `selectedUser` si está activo
       setSelectedUser(prev => prev && prev.id === id ? { ...prev, ...data } : prev);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'No se pudo editar el usuario');
     }
   };

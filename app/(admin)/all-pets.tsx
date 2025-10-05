@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View,
   ActivityIndicator,
   Alert,
+  Button,
   FlatList,
   StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  Button,
   Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import axiosClient from '../../api/axiosClient';
-import DetailModal from '../../components/ui/DetailModal';
 import PetDetailContent from '../../components/admin/PetDetailContent';
+import DetailModal from '../../components/ui/DetailModal';
 
 type Pet = {
   id: number;
@@ -46,7 +46,7 @@ export default function AllPets() {
     try {
       const response = await axiosClient.get<Pet[]>('/api/pets');
       setPets(response.data);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'No se pudieron cargar las mascotas');
     } finally {
       setLoading(false);
@@ -62,7 +62,7 @@ export default function AllPets() {
       setPets(updatedPets);
       setEditingPetId(null);
       Alert.alert('Éxito', 'Raza actualizada');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'No se pudo actualizar la raza');
     }
   };

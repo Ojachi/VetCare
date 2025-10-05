@@ -1,13 +1,12 @@
-import React, { useContext, useEffect } from "react";
-import { Tabs, useRouter } from "expo-router";
-import { View, Alert, StyleSheet, Text } from "react-native";
-import { SessionContext } from "../../context/SessionContext";
-import AdminHeader from "../../components/ui/AdminHeader";
 import {
-  MaterialIcons,
   FontAwesome5,
-  Entypo,
+  MaterialIcons,
 } from "@expo/vector-icons";
+import { Tabs, useRouter } from "expo-router";
+import React, { useContext, useEffect } from "react";
+import { Alert, StyleSheet, Text, View } from "react-native";
+import AdminHeader from "../../components/ui/AdminHeader";
+import { SessionContext } from "../../context/SessionContext";
 
 export default function AdminLayout() {
   const { user, isLoading } = useContext(SessionContext);
@@ -67,19 +66,9 @@ export default function AdminLayout() {
           }}
         />
         <Tabs.Screen
-          name="registrar-service"
+          name="services"
           options={{
-            title: "Registrar Servicio",
-            tabBarIcon: ({ color, size }) => (
-              <Entypo name="plus" color={color} size={size} />
-            ),
-            headerShown: false,
-          }}
-        />
-        <Tabs.Screen
-          name="view-services"
-          options={{
-            title: "Ver Servicios",
+            title: "Gestión de Servicios",
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="list" color={color} size={size} />
             ),

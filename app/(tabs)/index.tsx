@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Button, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import { Button, StyleSheet, View } from 'react-native';
 import LogoutButton from '../../components/ui/LogoutButton';
 
 export default function Home() {
@@ -15,8 +15,7 @@ export default function Home() {
       {/* Botones para Admin */}
       <Button title="Usuarios (Admin)" onPress={() => router.push('/(admin)/users')} />
       <Button title="Mascotas (Admin)" onPress={() => router.push('/(admin)/all-pets')} />
-      <Button title="Registrar Servicio (Admin)" onPress={() => router.push('/(admin)/registrar-service')} />
-      <Button title="Ver Servicios (Admin)" onPress={() => router.push('/(admin)/view-services')} />
+  <Button title="Gestión de Servicios (Admin)" onPress={() => router.push('/(admin)/services')} />
       <LogoutButton />
     </View>
   );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, Alert } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 
 type Appointment = {
@@ -21,7 +21,7 @@ export default function ViewAppointments() {
         const response = await axiosClient.get<Appointment[]>('/api/appointments');
         setAppointments(response.data);
         console.log(response.data);
-      } catch (error) {
+      } catch {
         Alert.alert('Error', 'No se pudo cargar tus citas');
       } finally {
         setLoading(false);

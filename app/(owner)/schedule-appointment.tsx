@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import axiosClient from '../../api/axiosClient';
-import { useRouter } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
 import DateTimePickerInput from '@/components/ui/DateTimePickerInput';
+import { Picker } from '@react-native-picker/picker';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Alert, StyleSheet, TextInput, View } from 'react-native';
+import axiosClient from '../../api/axiosClient';
+import Button from '../../components/ui/Button';
 
 
 type Pet = {
@@ -27,6 +28,12 @@ export default function ScheduleAppointment() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [dateTime, setDateTime] = useState(new Date());
+  useEffect(() => {
+    const params: any = (router as any).params || {};
+    if (params?.petId) {
+      setSelectedPetId(Number(params.petId));
+    }
+  }, [router]);
 
   useEffect(() => {
     // Cargar mascotas del usuario
@@ -34,7 +41,7 @@ export default function ScheduleAppointment() {
       try {
         const response = await axiosClient.get<Pet[]>('/api/pets');
         setPets(response.data);
-      } catch (error) {
+      } catch {
         Alert.alert('Error', 'No se pudieron cargar las mascotas');
       }
     };
@@ -43,11 +50,21 @@ export default function ScheduleAppointment() {
       try {
         const response = await axiosClient.get<Service[]>('/api/services');
         setServices(response.data);
-      } catch (error) {
+      } catch {
         Alert.alert('Error', 'No se pudieron cargar los servicios');
       }
     };
     fetchService();
+    const fetchUsers = async () => {
+      try {
+        const res = await axiosClient.get<any[]>('/api/users');
+        const vets = res.data.filter((u: any) => u.role === 'VETERINARIAN');
+        setAssignedToId(vets.length ? vets[0].id : null);
+      } catch {
+        // ignore
+      }
+    };
+    fetchUsers();
   }, []);
 
   const handleSubmit = async () => {
@@ -75,7 +92,7 @@ export default function ScheduleAppointment() {
       setAssignedToId(null);
       setNote('');
       router.push('/(tabs)/view-appointments');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'No se pudo agendar la cita');
     } finally {
       setLoading(false);
@@ -119,12 +136,12 @@ export default function ScheduleAppointment() {
         value={note}
         onChangeText={setNote}
       />
-      <Button title={loading ? 'Agendando...' : 'Agendar'} onPress={handleSubmit} disabled={loading} />
+  <Button title={loading ? 'Agendando...' : 'Agendar'} onPress={handleSubmit} disabled={loading} />
 
       <Button
         title="Ver mis citas"
         onPress={() => router.push('/(tabs)/view-appointments')}
-        color="#007bff"
+        style={{ backgroundColor: '#007bff' }}
       />
     </View>
   );

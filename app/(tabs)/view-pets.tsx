@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, Alert } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 
 type Pet = {
@@ -21,7 +21,7 @@ export default function ViewPets() {
       try {
         const response = await axiosClient.get<Pet[]>('/api/pets');
         setPets(response.data);
-      } catch (error) {
+      } catch {
         Alert.alert('Error', 'No se pudo cargar tus mascotas');
       } finally {
         setLoading(false);

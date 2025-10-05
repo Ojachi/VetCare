@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, Alert } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
+import Button from '../../components/ui/Button';
 
 type Appointment = {
   id: number;
@@ -20,8 +21,7 @@ export default function ViewAppointments() {
       try {
         const response = await axiosClient.get<Appointment[]>('/api/appointments');
         setAppointments(response.data);
-        console.log(response.data);
-      } catch (error) {
+      } catch {
         Alert.alert('Error', 'No se pudo cargar tus citas');
       } finally {
         setLoading(false);
@@ -53,6 +53,19 @@ export default function ViewAppointments() {
       <Text>Veterinario: {item.assignedToName}</Text>
       <Text>Fecha y hora: {item.startDateTime.replace('T', ' ')}</Text>
       {item.note ? <Text>Nota: {item.note}</Text> : null}
+      <View style={{ marginTop: 8 }}>
+        <Button title="Cancelar" onPress={async () => {
+          try {
+            await axiosClient.post(`/api/appointments/${item.id}/cancel`);
+            Alert.alert('Éxito', 'Cita cancelada');
+            // refresh
+            const resp = await axiosClient.get<Appointment[]>('/api/appointments');
+            setAppointments(resp.data);
+          } catch {
+            Alert.alert('Error', 'No se pudo cancelar la cita');
+          }
+        }} style={{ backgroundColor: '#e74c3c' }} />
+      </View>
     </View>
   );
 

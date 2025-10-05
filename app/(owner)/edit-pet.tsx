@@ -1,4 +1,3 @@
-import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
@@ -6,13 +5,12 @@ import axiosClient from '../../api/axiosClient';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 
-export default function EmployeeEditPet() {
+export default function EditPet() {
   const router = useRouter();
   const params: any = (router as any).params || {};
   const petId = params?.petId;
   const [loading, setLoading] = useState(false);
   const [pet, setPet] = useState<any>(null);
-  const [owners, setOwners] = useState<any[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -24,15 +22,7 @@ export default function EmployeeEditPet() {
         Alert.alert('Error', 'No se pudo cargar la mascota');
       }
     };
-    const fetchOwners = async () => {
-      try {
-        const res = await axiosClient.get('/api/users');
-        setOwners((res.data || []).filter((u: any) => u.role === 'OWNER'));
-      } catch {
-        // ignore
-      }
-    };
-    load(); fetchOwners();
+    load();
   }, [petId]);
 
   const onSave = async () => {
@@ -53,19 +43,13 @@ export default function EmployeeEditPet() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Editar Mascota (Empleado)</Text>
+      <Text style={styles.title}>Editar Mascota</Text>
       <Input placeholder="Nombre" value={pet.name} onChangeText={(v) => setPet({ ...pet, name: v })} />
       <Input placeholder="Especie" value={pet.species} onChangeText={(v) => setPet({ ...pet, species: v })} />
       <Input placeholder="Raza" value={pet.breed} onChangeText={(v) => setPet({ ...pet, breed: v })} />
       <Input placeholder="Género" value={pet.sex} onChangeText={(v) => setPet({ ...pet, sex: v })} />
       <Input placeholder="Peso" value={pet.weight ? String(pet.weight) : ''} onChangeText={(v) => setPet({ ...pet, weight: Number(v) })} keyboardType="numeric" />
       <Input placeholder="Edad" value={pet.age ? String(pet.age) : ''} onChangeText={(v) => setPet({ ...pet, age: Number(v) })} keyboardType="numeric" />
-
-      <Picker selectedValue={String(pet.ownerId || pet.owner?.id || '')} onValueChange={(v) => setPet({ ...pet, ownerId: Number(v) })}>
-        <Picker.Item label="Selecciona propietario" value={''} />
-        {owners.map((o) => <Picker.Item key={o.id} label={o.name} value={String(o.id)} />)}
-      </Picker>
-
       <Button title={loading ? 'Guardando...' : 'Guardar'} onPress={onSave} />
     </View>
   );
