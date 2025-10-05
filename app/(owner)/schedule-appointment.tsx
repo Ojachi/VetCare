@@ -1,6 +1,6 @@
 import DateTimePickerInput from '@/components/ui/DateTimePickerInput';
 import { Picker } from '@react-native-picker/picker';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, TextInput, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
@@ -28,12 +28,13 @@ export default function ScheduleAppointment() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [dateTime, setDateTime] = useState(new Date());
+  const petId = useLocalSearchParams<{ petId: string }>();
+
   useEffect(() => {
-    const params: any = (router as any).params || {};
-    if (params?.petId) {
-      setSelectedPetId(Number(params.petId));
+    if (petId) {
+      setSelectedPetId(Number(petId));
     }
-  }, [router]);
+  }, [petId]);
 
   useEffect(() => {
     // Cargar mascotas del usuario

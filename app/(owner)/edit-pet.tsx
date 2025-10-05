@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
@@ -7,8 +7,7 @@ import Input from '../../components/ui/Input';
 
 export default function EditPet() {
   const router = useRouter();
-  const params: any = (router as any).params || {};
-  const petId = params?.petId;
+  const petId = useLocalSearchParams<{ petId: string }>();
   const [loading, setLoading] = useState(false);
   const [pet, setPet] = useState<any>(null);
 
