@@ -1,5 +1,8 @@
 import React from 'react';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
+import Card from '../ui/Card';
 
 type User = {
   id: number;
@@ -17,34 +20,18 @@ type Props = {
 
 export default function UserCard({ user, onShowDetail }: Props) {
   return (
-    <TouchableOpacity style={styles.userCard} onPress={() => onShowDetail(user)}>
-      <Text style={styles.name}>{user.name}</Text>
-      <Text style={styles.items}>{user.email}</Text>
-      <Text style={styles.items}>{user.address}</Text>
-      <Text style={styles.items}>{user.phone}</Text>
-      <Text style={styles.items}>{user.role}</Text>
-      
+    <TouchableOpacity activeOpacity={0.85} onPress={() => onShowDetail(user)}>
+      <Card>
+        <Text style={typography.h3}>{user.name}</Text>
+        <Text style={typography.subtitle}>{user.email}</Text>
+        {!!user.address && (
+          <Text style={[typography.body, { marginTop: 6 }]}>{user.address}</Text>
+        )}
+        {!!user.phone && <Text style={typography.body}>{user.phone}</Text>}
+        <Text style={[typography.caption, { marginTop: 6 }]}>
+          Rol: <Text style={{ fontWeight: '700', color: colors.primary }}>{user.role}</Text>
+        </Text>
+      </Card>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  userCard: {
-    marginBottom: 15,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  items: {
-    marginBottom: 5,
-  },
-  name: { fontWeight: 'bold', fontSize: 16 },
-  picker: { height: 50, width: '100%', marginLeft: -9, marginTop: -15 },
-});

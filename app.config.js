@@ -3,7 +3,7 @@ import 'dotenv/config';
 export default {
   expo: {
     name: "VetCare",
-    slug: "VetCare",
+    slug: "vetcare",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
@@ -54,8 +54,9 @@ export default {
       apiUrlDevice: process.env.API_URL_DEVICE,
       apiUrlWeb: process.env.EXPO_PUBLIC_API_URL,
       eas: {
-        projectId: "80d61c11-4c68-4984-aea5-ae9c3f8cf4f1"
+        projectId: process.env.EXPO_PROJECT_ID
       }
-    }
+    },
+    owner: "oscarandrade"
   }
 }

@@ -9,20 +9,33 @@ export default function VetLayout() {
 	const { user, isLoading } = useContext(SessionContext);
 	const router = useRouter();
 
-	useEffect(() => {
-		if (!isLoading && !user) {
-			router.replace('/(auth)/login' as any);
-		}
-	}, [user, isLoading, router]);
+		useEffect(() => {
+			if (!isLoading) {
+				if (!user) {
+					router.replace('/(auth)/login' as any);
+					return;
+				}
+				if (!(user.role === 'VETERINARIAN' || user.role === 'VET')) {
+					if (user.role === 'ADMIN') router.replace('/(admin)' as any);
+					else if (user.role === 'OWNER') router.replace('/(owner)' as any);
+					else if (user.role === 'EMPLOYEE') router.replace('/(employee)' as any);
+					else router.replace('/(auth)/login' as any);
+				}
+			}
+		}, [user, isLoading, router]);
 
 	if (isLoading) return (<View style={styles.center}><Text>Cargando...</Text></View>);
 
 	return (
 		<>
-			<VetHeader />
+			<VetHeader title="Veterinario" />
 			<Tabs
 				screenOptions={({ route }) => ({
 					headerShown: false,
+					tabBarActiveTintColor: '#2E8B57',
+					tabBarInactiveTintColor: '#6B7280',
+					tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#EEF2F3', height: 60, paddingBottom: 6 },
+					tabBarLabelStyle: { fontWeight: '600' },
 					tabBarIcon: ({ color, size }) => {
 						switch (route.name) {
 							case 'index': return <MaterialIcons name="home" color={color} size={size} />;

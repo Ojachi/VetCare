@@ -1,17 +1,17 @@
-import axiosClient from "@/api/axiosClient";
+import axiosClient, { apiBaseUrlResolved } from "@/api/axiosClient";
 import CookieManager from "@react-native-cookies/cookies";
-import Constants from "expo-constants";
+// no Constants needed here
 import { useRouter, useSegments } from "expo-router";
 import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState,
 } from "react";
 import { Alert } from "react-native";
 
-const apiBaseUrl = Constants.expoConfig?.extra?.apiUrlAndroid;
+const apiBaseUrl = apiBaseUrlResolved;
 
 type UserType = { email: string; [key: string]: any } | null;
 
@@ -39,7 +39,9 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   // Revisar si la cookie de sesión existe
   const checkSessionCookie = async (): Promise<boolean> => {
-    const cookies = await CookieManager.get(apiBaseUrl); // Poner url de backend real
+    const base = apiBaseUrl || '';
+    if (!base) return false;
+    const cookies = await CookieManager.get(base); // URL base del backend
     // Aquí el nombre correcto de la cookie que usa backend para sesión
     return cookies && cookies["JSESSIONID"] !== undefined;
   };
@@ -71,7 +73,8 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const inAuthGroup = segments[0] === "(auth)";
     const inAdminGroup = segments[0] === "(admin)";
     const inOwnerGroup = segments[0] === "(owner)";
-    const inVetGroup = segments[0] === "(veterinarian)";
+  const inVetGroup = segments[0] === "(veterinarian)";
+  const inEmployeeGroup = segments[0] === "(employee)";
 
     if (!user && !inAuthGroup) {
       router.replace("/(auth)/login");
@@ -88,15 +91,16 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         router.replace("/(owner)" as any);
         return;
       }
-      if (
-        (user.role === "VETERINARIAN" || user.role === "VET") &&
-        !inVetGroup
-      ) {
+      if (user.role === "EMPLOYEE" && !inEmployeeGroup) {
+        router.replace("/(employee)" as any);
+        return;
+      }
+      if ((user.role === "VETERINARIAN" || user.role === "VET") && !inVetGroup) {
         router.replace("/(veterinarian)" as any);
         return;
       }
-      // fallback to tabs for any other roles
-      router.replace("/(tabs)" as any);
+      
+      // fallback no-op
     }
   }, [user, segments, isLoading, router]);
 

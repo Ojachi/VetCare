@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import Button from '../../components/ui/Button';
+import ChangePassword from '../../components/ui/ChangePassword';
 import Input from '../../components/ui/Input';
 import { useSession } from '../../context/SessionContext';
 
@@ -41,12 +42,16 @@ export default function Profile() {
           <Input placeholder="Email" value={form.email || ''} onChangeText={(v) => setForm({ ...form, email: v })} keyboardType="email-address" />
           <Button title="Guardar" onPress={save} />
           <Button title="Cancelar" onPress={() => setEditing(false)} style={{ backgroundColor: '#999' }} />
+          <View style={{ height: 1, backgroundColor: '#eee', width: '100%', marginVertical: 16 }} />
+          <ChangePassword />
         </>
       ) : (
         <>
           <Text style={styles.name}>{form.name}</Text>
           <Text style={styles.email}>{form.email}</Text>
           <Button title="Editar perfil" onPress={() => setEditing(true)} />
+          <View style={{ height: 1, backgroundColor: '#eee', width: '100%', marginVertical: 16 }} />
+          <ChangePassword />
         </>
       )}
     </View>

@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import LogoutButton from '../../components/ui/LogoutButton';
+import colors from '../../styles/colors';
 
 const buttons = [
   { label: 'Mis Mascotas', path: '/(owner)/view-pets', color: '#27ae60', icon: require('../../assets/images/admin_pet.png') },
@@ -30,7 +31,7 @@ export default function OwnerHome() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 30, alignItems: 'center' },
+  container: { flex: 1, paddingTop: 30, alignItems: 'center', backgroundColor: colors.background },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
   button: { width: 158, height: 130, margin: 8, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold', textAlign: 'center' },

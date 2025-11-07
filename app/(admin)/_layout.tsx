@@ -1,6 +1,6 @@
 import {
-  FontAwesome5,
-  MaterialIcons,
+    FontAwesome5,
+    MaterialIcons,
 } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import React, { useContext, useEffect } from "react";
@@ -18,7 +18,11 @@ export default function AdminLayout() {
         router.replace("/(auth)/login");
       } else if (user.role !== "ADMIN") {
         Alert.alert("Acceso denegado", "No tienes permisos para esta sección");
-        router.replace("/(tabs)"); // O ruta común para otros usuarios
+        // Redirect to their role-based home
+        if (user.role === "OWNER") router.replace("/(owner)" as any);
+        else if (user.role === "VETERINARIAN" || user.role === "VET") router.replace("/(veterinarian)" as any);
+        else if (user.role === "EMPLOYEE") router.replace("/(employee)" as any);
+        else router.replace("/(auth)/login");
       }
     }
   }, [user, isLoading, router]);
@@ -33,8 +37,16 @@ export default function AdminLayout() {
 
   return (
     <>
-      <AdminHeader />
-      <Tabs>
+      <AdminHeader title="Administración" />
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: '#2E8B57',
+          tabBarInactiveTintColor: '#6B7280',
+          tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#EEF2F3', height: 60, paddingBottom: 6 },
+          tabBarLabelStyle: { fontWeight: '600' },
+        }}
+      >
         <Tabs.Screen
           name="index"
           options={{

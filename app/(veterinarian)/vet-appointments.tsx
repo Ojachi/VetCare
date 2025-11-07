@@ -1,21 +1,35 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import { SessionContext } from '../../context/SessionContext';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
+import { alertApiError } from '../../utils/apiError';
+import { formatDisplayDateTime } from '../../utils/date';
 
 export default function VetAppointments() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { user } = useContext(SessionContext);
 
   const fetchAppointments = async () => {
     setLoading(true);
     try {
       const res = await axiosClient.get('/api/appointments');
-      setAppointments(res.data || []);
+      const all = res.data || [];
+      // filter by vet if logged user is a veterinarian
+      const filtered = (user && (user.role === 'VETERINARIAN' || user.role === 'VET'))
+        ? all.filter((a: any) => a.assignedTo?.id === user.id)
+        : all;
+      setAppointments(filtered);
     } catch (err) {
       console.error(err);
-      Alert.alert('Error', 'No se pudieron cargar las citas.');
+      alertApiError(err, 'No se pudieron cargar las citas.');
     } finally {
       setLoading(false);
     }
@@ -23,31 +37,48 @@ export default function VetAppointments() {
 
   useEffect(() => {
     fetchAppointments();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const renderItem = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.title}>{item.pet?.name || 'Mascota desconocida'}</Text>
-        <Text>{new Date(item.scheduledAt).toLocaleString()}</Text>
-        <Text>Servicio: {item.service?.name}</Text>
-        <Text>Estado: {item.status}</Text>
+    <Card>
+      <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <Text style={typography.h3}>{item.pet?.name || 'Mascota desconocida'}</Text>
+          <Text style={typography.subtitle}>
+            {formatDisplayDateTime(item.startDateTime || item.scheduledAt)}
+          </Text>
+          <Text style={[typography.body, { marginTop: 6 }]}>Servicio: {item.service?.name}</Text>
+          <Text style={typography.caption}>Estado: {item.status}</Text>
+        </View>
+        <View style={styles.actions}>
+          <Button
+            title="Confirmar"
+            onPress={() => handleConfirm(item.id)}
+            style={{ backgroundColor: colors.success, paddingVertical: 10, marginVertical: 4 }}
+            textStyle={{ fontSize: 14 }}
+          />
+          <Button
+            title="Completar"
+            onPress={() => handleMarkDone(item.id)}
+            style={{ backgroundColor: colors.primary, paddingVertical: 10, marginVertical: 4 }}
+            textStyle={{ fontSize: 14 }}
+          />
+          <Button
+            title="Diagnosticar"
+            onPress={() => handleDiagnose(item)}
+            style={{ backgroundColor: colors.warning, paddingVertical: 10, marginVertical: 4 }}
+            textStyle={{ fontSize: 14 }}
+          />
+          <Button
+            title="Cancelar"
+            onPress={() => handleCancel(item.id)}
+            style={{ backgroundColor: colors.danger, paddingVertical: 10, marginVertical: 4 }}
+            textStyle={{ fontSize: 14 }}
+          />
+        </View>
       </View>
-      <View style={styles.actions}>
-        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#27ae60' }]} onPress={() => handleConfirm(item.id)}>
-          <Text style={styles.actionText}>Confirmar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#2ecc71' }]} onPress={() => handleMarkDone(item.id)}>
-          <Text style={styles.actionText}>Completar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#f39c12' }]} onPress={() => handleDiagnose(item)}>
-          <Text style={styles.actionText}>Diagnosticar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#e74c3c' }]} onPress={() => handleCancel(item.id)}>
-          <Text style={styles.actionText}>Cancelar</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </Card>
   );
 
   const handleMarkDone = async (id: string) => {
@@ -56,7 +87,7 @@ export default function VetAppointments() {
       fetchAppointments();
     } catch (err) {
       console.error(err);
-      Alert.alert('Error', 'No se pudo actualizar el estado.');
+      alertApiError(err, 'No se pudo actualizar el estado.');
     }
   };
 
@@ -66,7 +97,7 @@ export default function VetAppointments() {
       fetchAppointments();
     } catch (err) {
       console.error(err);
-      Alert.alert('Error', 'No se pudo confirmar la cita.');
+      alertApiError(err, 'No se pudo confirmar la cita.');
     }
   };
 
@@ -84,11 +115,11 @@ export default function VetAppointments() {
         text: 'Sí',
         onPress: async () => {
           try {
-            await axiosClient.post(`/api/appointments/${id}/cancel`);
+            await axiosClient.put(`/api/appointments/${id}/cancel`);
             fetchAppointments();
           } catch (err) {
             console.error(err);
-            Alert.alert('Error', 'No se pudo cancelar la cita.');
+            alertApiError(err, 'No se pudo cancelar la cita.');
           }
         },
       },
@@ -97,16 +128,28 @@ export default function VetAppointments() {
 
   return (
     <View style={styles.container}>
-      <FlatList data={appointments} keyExtractor={(i) => i.id} renderItem={renderItem} refreshing={loading} onRefresh={fetchAppointments} ListEmptyComponent={() => <Text style={{ padding: 20 }}>No hay citas</Text>} />
+      {loading && appointments.length === 0 ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      ) : (
+        <FlatList
+          contentContainerStyle={{ padding: 12, paddingBottom: 24 }}
+          data={appointments}
+          keyExtractor={(i) => i.id}
+          renderItem={renderItem}
+          refreshing={loading}
+          onRefresh={fetchAppointments}
+          ListEmptyComponent={<EmptyState title="Sin citas" message="No hay citas" />}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  card: { flexDirection: 'row', padding: 12, margin: 8, backgroundColor: '#fff', borderRadius: 10, alignItems: 'center' },
-  title: { fontWeight: 'bold', fontSize: 16 },
-  actions: { justifyContent: 'center' },
-  actionBtn: { padding: 8, borderRadius: 8, marginVertical: 4, minWidth: 90, alignItems: 'center' },
-  actionText: { color: '#fff', fontWeight: 'bold' },
+  container: { flex: 1, backgroundColor: colors.background },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  actions: { justifyContent: 'center', width: 140, marginLeft: 8 },
 });

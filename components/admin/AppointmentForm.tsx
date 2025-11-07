@@ -1,8 +1,9 @@
 import { Picker } from '@react-native-picker/picker';
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
-import axiosClient from '../../api/axiosClient';
+import axiosClient, { formatLocalDateTime } from '../../api/axiosClient';
 import DateTimePickerInput from '../../components/ui/DateTimePickerInput';
+import { alertApiError } from '../../utils/apiError';
 
 export default function AppointmentForm({
   appointment,
@@ -36,8 +37,8 @@ export default function AppointmentForm({
         setServices(servicesRes.data);
         const vetsOnly = (usersRes.data || []).filter((u: any) => u.role === 'VETERINARIAN');
         setVets(vetsOnly);
-      } catch {
-        Alert.alert('Error', 'No se pudieron cargar opciones para la cita');
+      } catch (err) {
+        alertApiError(err, 'No se pudieron cargar opciones para la cita');
       }
     };
     fetchOptions();
@@ -54,7 +55,7 @@ export default function AppointmentForm({
       petId,
       serviceId,
       assignedToId,
-      startDateTime: dateTime,
+      startDateTime: formatLocalDateTime(dateTime),
       note,
     };
 
@@ -66,8 +67,8 @@ export default function AppointmentForm({
         res = await axiosClient.post('/api/appointments', payload);
       }
       onSaved(res.data);
-    } catch {
-      Alert.alert('Error', 'No se pudo guardar la cita');
+    } catch (err) {
+      alertApiError(err, 'No se pudo guardar la cita');
     } finally {
       setLoading(false);
     }

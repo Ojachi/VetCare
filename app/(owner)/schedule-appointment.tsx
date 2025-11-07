@@ -1,10 +1,14 @@
 import DateTimePickerInput from '@/components/ui/DateTimePickerInput';
 import { Picker } from '@react-native-picker/picker';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, TextInput, View } from 'react-native';
-import axiosClient from '../../api/axiosClient';
+import axiosClient, { formatLocalDateTime } from '../../api/axiosClient';
 import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
+import { alertApiError } from '../../utils/apiError';
 
 
 type Pet = {
@@ -28,7 +32,7 @@ export default function ScheduleAppointment() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [dateTime, setDateTime] = useState(new Date());
-  const petId = useLocalSearchParams<{ petId: string }>();
+  const { petId } = useLocalSearchParams<{ petId?: string }>();
 
   useEffect(() => {
     if (petId) {
@@ -42,8 +46,8 @@ export default function ScheduleAppointment() {
       try {
         const response = await axiosClient.get<Pet[]>('/api/pets');
         setPets(response.data);
-      } catch {
-        Alert.alert('Error', 'No se pudieron cargar las mascotas');
+      } catch (err) {
+        alertApiError(err, 'No se pudieron cargar las mascotas');
       }
     };
     fetchPets();
@@ -51,8 +55,8 @@ export default function ScheduleAppointment() {
       try {
         const response = await axiosClient.get<Service[]>('/api/services');
         setServices(response.data);
-      } catch {
-        Alert.alert('Error', 'No se pudieron cargar los servicios');
+      } catch (err) {
+        alertApiError(err, 'No se pudieron cargar los servicios');
       }
     };
     fetchService();
@@ -81,7 +85,7 @@ export default function ScheduleAppointment() {
       petId: selectedPetId,
       serviceId,
       assignedToId,
-      startDateTime: dateTime, // ejemplo: '2025-09-26T14:30:00'
+  startDateTime: formatLocalDateTime(dateTime),
       note,
     };
 
@@ -92,9 +96,9 @@ export default function ScheduleAppointment() {
       setServiceId(null);
       setAssignedToId(null);
       setNote('');
-      router.push('/(tabs)/view-appointments');
-    } catch {
-      Alert.alert('Error', 'No se pudo agendar la cita');
+  router.push('/(owner)/view-appointments' as any);
+    } catch (err) {
+      alertApiError(err, 'No se pudo agendar la cita');
     } finally {
       setLoading(false);
     }
@@ -102,6 +106,10 @@ export default function ScheduleAppointment() {
 
   return (
     <View style={styles.container}>
+      <Card>
+        <View style={{ marginBottom: 12 }}>
+          <TextInput editable={false} style={[styles.title, { color: colors.darkGray }]} value={"Agendar Cita"} />
+        </View>
       <Picker
         selectedValue={selectedPetId}
         onValueChange={(value) => setSelectedPetId(value)}
@@ -141,9 +149,10 @@ export default function ScheduleAppointment() {
 
       <Button
         title="Ver mis citas"
-        onPress={() => router.push('/(tabs)/view-appointments')}
-        style={{ backgroundColor: '#007bff' }}
+        onPress={() => router.push('/(owner)/view-appointments' as any)}
+        style={{ backgroundColor: colors.secondary }}
       />
+      </Card>
     </View>
   );
 }
@@ -151,23 +160,21 @@ export default function ScheduleAppointment() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    backgroundColor: '#fff',
+    padding: 16,
+    backgroundColor: colors.background,
     justifyContent: 'center',
-    
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 24,
+    ...typography.h2,
     textAlign: 'center',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
+    borderColor: '#EEF2F3',
+    borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     fontSize: 16,
+    backgroundColor: colors.white,
   },
 });

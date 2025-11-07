@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Text, Alert, StyleSheet } from 'react-native';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
-import axiosClient from '../../api/axiosClient';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
+import axiosClient from '../../api/axiosClient';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import { alertApiError } from '../../utils/apiError';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -40,7 +41,7 @@ export default function Register() {
       router.replace('/(auth)/login');
     } catch (error: any) {
       console.log('Error registering:', error);
-      Alert.alert('Error', 'No se pudo registrar');
+      alertApiError(error, 'No se pudo registrar');
     } finally {
       setLoading(false);
     }
@@ -55,7 +56,7 @@ export default function Register() {
       <Input placeholder="Dirección" value={address} onChangeText={setAddress} style={styles.input} />
       <Input placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
       <Input placeholder="Confirmar Contraseña" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry style={styles.input} />
-      <Button title={loading ? 'Cargando...' : 'Registrar'} onPress={onRegister} />
+  <Button title={loading ? 'Cargando...' : 'Registrar'} onPress={onRegister} disabled={loading} />
     </KeyboardAvoidingView>
   );
 }

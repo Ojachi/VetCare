@@ -54,3 +54,5 @@ app-example
 .cursor/
 
 .env
+
+ENDPOINTS_FULL.md

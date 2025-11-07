@@ -1,5 +1,8 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
+import { formatDisplayDateTime } from '../../utils/date';
 
 export default function MedicalRecordDetail({ record }: { record: any }) {
   const appointment = record.appointment;
@@ -10,7 +13,7 @@ export default function MedicalRecordDetail({ record }: { record: any }) {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Historial Médico</Text>
+      <Text style={typography.h3}>Historial Médico</Text>
 
       <Text style={styles.sectionTitle}>Resumen</Text>
       <Text style={styles.text}>{record.description ?? record.treatment ?? '—'}</Text>
@@ -23,7 +26,7 @@ export default function MedicalRecordDetail({ record }: { record: any }) {
 
       <Text style={styles.sectionTitle}>Cita</Text>
       <Text style={styles.text}>Servicio: {service?.name ?? '—'}</Text>
-      <Text style={styles.text}>Fecha: {appointment?.startDateTime ?? record.date ?? '—'}</Text>
+      <Text style={styles.text}>Fecha: {formatDisplayDateTime(appointment?.startDateTime ?? record.date ?? '')}</Text>
 
       <Text style={styles.sectionTitle}>Paciente</Text>
       <Text style={styles.text}>Nombre: {pet?.name ?? '—'}</Text>
@@ -44,8 +47,7 @@ export default function MedicalRecordDetail({ record }: { record: any }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  header: { fontSize: 20, fontWeight: '700', marginBottom: 12 },
-  sectionTitle: { fontSize: 15, fontWeight: '600', marginTop: 12 },
-  text: { fontSize: 14, color: '#333', marginTop: 4 },
+  container: { flex: 1, padding: 16, backgroundColor: colors.white },
+  sectionTitle: { ...typography.subtitle, marginTop: 12 } as any,
+  text: { ...typography.body, marginTop: 4 } as any,
 });

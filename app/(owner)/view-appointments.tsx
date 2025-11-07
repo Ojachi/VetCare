@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
+import { alertApiError } from '../../utils/apiError';
+import { formatDisplayDateTime } from '../../utils/date';
 
 type Appointment = {
   id: number;
@@ -21,8 +27,8 @@ export default function ViewAppointments() {
       try {
         const response = await axiosClient.get<Appointment[]>('/api/appointments');
         setAppointments(response.data);
-      } catch {
-        Alert.alert('Error', 'No se pudo cargar tus citas');
+      } catch (err) {
+        alertApiError(err, 'No se pudo cargar tus citas');
       } finally {
         setLoading(false);
       }
@@ -33,62 +39,58 @@ export default function ViewAppointments() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (appointments.length === 0) {
     return (
-      <View style={styles.center}>
-        <Text>No tienes citas agendadas</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}> 
+        <EmptyState title="Sin citas" message="No tienes citas agendadas por ahora." />
       </View>
     );
   }
 
   const renderAppointment = ({ item }: { item: Appointment }) => (
-    <View style={styles.card}>
-      <Text style={styles.bold}>{item.petName}</Text>
-      <Text>Servicio: {item.serviceName}</Text>
-      <Text>Veterinario: {item.assignedToName}</Text>
-      <Text>Fecha y hora: {item.startDateTime.replace('T', ' ')}</Text>
-      {item.note ? <Text>Nota: {item.note}</Text> : null}
-      <View style={{ marginTop: 8 }}>
-        <Button title="Cancelar" onPress={async () => {
-          try {
-            await axiosClient.post(`/api/appointments/${item.id}/cancel`);
-            Alert.alert('Éxito', 'Cita cancelada');
-            // refresh
-            const resp = await axiosClient.get<Appointment[]>('/api/appointments');
-            setAppointments(resp.data);
-          } catch {
-            Alert.alert('Error', 'No se pudo cancelar la cita');
-          }
-        }} style={{ backgroundColor: '#e74c3c' }} />
+    <Card>
+      <Text style={[typography.h3]}>{item.petName}</Text>
+      <Text style={typography.subtitle}>Servicio: {item.serviceName}</Text>
+      <Text style={typography.body}>Veterinario: {item.assignedToName}</Text>
+      <Text style={typography.body}>Fecha y hora: {formatDisplayDateTime(item.startDateTime)}</Text>
+      {item.note ? <Text style={[typography.caption, { marginTop: 4 }]}>Nota: {item.note}</Text> : null}
+      <View style={{ marginTop: 10 }}>
+        <Button
+          title="Cancelar"
+          onPress={async () => {
+            try {
+              await axiosClient.put(`/api/appointments/${item.id}/cancel`);
+              Alert.alert('Éxito', 'Cita cancelada');
+              const resp = await axiosClient.get<Appointment[]>('/api/appointments');
+              setAppointments(resp.data);
+            } catch (err) {
+              alertApiError(err, 'No se pudo cancelar la cita');
+            }
+          }}
+          style={{ backgroundColor: colors.danger }}
+        />
       </View>
-    </View>
+    </Card>
   );
 
   return (
-    <FlatList
-      data={appointments}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={renderAppointment}
-      contentContainerStyle={styles.list}
-    />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <FlatList
+        data={appointments}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderAppointment}
+        contentContainerStyle={styles.list}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 16 },
-  card: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-    backgroundColor: '#f7f7fa',
-  },
-  bold: { fontWeight: 'bold', fontSize: 16 },
 });

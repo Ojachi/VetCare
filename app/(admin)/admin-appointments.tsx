@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import AppointmentDetail from '../../components/admin/AppointmentDetail';
 import AppointmentForm from '../../components/admin/AppointmentForm';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
 import DetailModal from '../../components/ui/DetailModal';
+import EmptyState from '../../components/ui/EmptyState';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
+import { alertApiError } from '../../utils/apiError';
+import { formatDisplayDateTime } from '../../utils/date';
 
 export default function AdminAppointmentsScreen() {
     const [appointments, setAppointments] = useState<any[]>([]);
@@ -22,8 +29,8 @@ export default function AdminAppointmentsScreen() {
         try {
             const res = await axiosClient.get<any[]>('/api/appointments');
             setAppointments(res.data);
-        } catch {
-            Alert.alert('Error', 'No se pudieron cargar las citas');
+        } catch (err) {
+            alertApiError(err, 'No se pudieron cargar las citas');
         } finally {
             setLoading(false);
         }
@@ -51,8 +58,8 @@ export default function AdminAppointmentsScreen() {
                     setEditing({ id: res.data.id, appointment: res.data });
                     setModalMode('form');
                     setModalVisible(true);
-                } catch {
-                    Alert.alert('Error', 'No se pudieron cargar los detalles de la cita');
+                } catch (err) {
+                    alertApiError(err, 'No se pudieron cargar los detalles de la cita');
                 }
             })();
     };
@@ -71,8 +78,8 @@ export default function AdminAppointmentsScreen() {
                 setDetailAppointment(res.data);
                 setModalMode('detail');
                 setModalVisible(true);
-            } catch {
-                Alert.alert('Error', 'No se pudieron cargar los detalles de la cita');
+            } catch (err) {
+                alertApiError(err, 'No se pudieron cargar los detalles de la cita');
             }
         })();
     };
@@ -89,8 +96,8 @@ export default function AdminAppointmentsScreen() {
                             // refrescar lista
                             await loadAppointments();
                             Alert.alert('Éxito', 'Cita cancelada');
-                        } catch {
-                            Alert.alert('Error', 'No se pudo cancelar la cita');
+                        } catch (err) {
+                            alertApiError(err, 'No se pudo cancelar la cita');
                         }
                     },
                 },
@@ -102,8 +109,8 @@ export default function AdminAppointmentsScreen() {
                 await axiosClient.put(`/api/appointments/${id}/status`, { status });
                 await loadAppointments();
                 Alert.alert('Éxito', 'Estado actualizado');
-            } catch {
-                Alert.alert('Error', 'No se pudo actualizar el estado');
+            } catch (err) {
+                alertApiError(err, 'No se pudo actualizar el estado');
             }
         };
 
@@ -123,54 +130,71 @@ export default function AdminAppointmentsScreen() {
     const nonEditable = ['CONFIRMED','CANCELLED','ACCEPTED'];
 
         return (
-            <TouchableOpacity style={styles.card} onPress={() => handleShowDetail(item)}>
-                <Text style={styles.title}>{petName} — {ownerName}</Text>
-                <Text>{date}</Text>
-                <Text>Estado: {status}</Text>
-                {!nonEditable.includes(statusNorm) ? (
-                    <View style={styles.row}>
-                        <Button title="Editar" onPress={() => handleEdit(item)} />
-                        <Button title="Cancelar" color="red" onPress={() => handleCancel(item.id ?? item.appointment?.id)} />
-                        <Button title="Marcar como Confirmada" onPress={() => handleChangeStatus(item.id ?? item.appointment?.id, 'ACCEPTED')} />
-                    </View>
-                ) : null}
+            <TouchableOpacity activeOpacity={0.85} onPress={() => handleShowDetail(item)}>
+                <Card>
+                    <Text style={typography.h3}>{petName} — {ownerName}</Text>
+                    <Text style={typography.subtitle}>{formatDisplayDateTime(date)}</Text>
+                    <Text style={[typography.caption, { marginTop: 6 }]}>Estado: {status}</Text>
+                    {!nonEditable.includes(statusNorm) ? (
+                        <View style={styles.row}>
+                            <Button
+                                title="Editar"
+                                onPress={() => handleEdit(item)}
+                                style={{ backgroundColor: colors.secondary, flex: 1, marginRight: 8 }}
+                            />
+                            <Button
+                                title="Cancelar"
+                                onPress={() => handleCancel(item.id ?? item.appointment?.id)}
+                                style={{ backgroundColor: colors.danger, flex: 1, marginRight: 8 }}
+                            />
+                            <Button
+                                title="Marcar como Confirmada"
+                                onPress={() => handleChangeStatus(item.id ?? item.appointment?.id, 'ACCEPTED')}
+                                style={{ backgroundColor: colors.success, flex: 1 }}
+                            />
+                        </View>
+                    ) : null}
+                </Card>
             </TouchableOpacity>
         );
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Gestión de Citas</Text>
-            <TouchableOpacity style={styles.addButton} onPress={handleCreate}>
-                <Text style={styles.addButtonText}>+ Nueva Cita</Text>
-            </TouchableOpacity>
+            <Text style={[typography.h2, { paddingHorizontal: 16, marginBottom: 8 }]}>Gestión de Citas</Text>
+            <View style={{ paddingHorizontal: 16 }}>
+                <Button title="+ Nueva Cita" onPress={handleCreate} />
+            </View>
 
-            <FlatList
-                data={appointments}
-                keyExtractor={(item) => (item.id ?? item.appointment?.id)?.toString() ?? Math.random().toString()}
-                renderItem={renderItem}
-                ListEmptyComponent={<Text>No hay citas registradas.</Text>}
-                refreshing={loading}
-                onRefresh={loadAppointments}
-            />
+            {loading && appointments.length === 0 ? (
+                <View style={styles.center}> 
+                    <ActivityIndicator size="large" color={colors.primary} />
+                </View>
+            ) : (
+                <FlatList
+                    contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+                    data={appointments}
+                    keyExtractor={(item) => (item.id ?? item.appointment?.id)?.toString() ?? Math.random().toString()}
+                    renderItem={renderItem}
+                    ListEmptyComponent={<EmptyState title="Sin citas" message="No hay citas registradas." />}
+                    refreshing={loading}
+                    onRefresh={loadAppointments}
+                />
+            )}
 
-                    <DetailModal visible={modalVisible} onClose={() => setModalVisible(false)}>
-                        {modalMode === 'form' ? (
-                            <AppointmentForm appointment={editing} onSaved={onSaved} onCancel={() => setModalVisible(false)} />
-                        ) : (
-                            <AppointmentDetail appointment={detailAppointment} />
-                        )}
-                    </DetailModal>
+            <DetailModal visible={modalVisible} onClose={() => setModalVisible(false)}>
+                {modalMode === 'form' ? (
+                    <AppointmentForm appointment={editing} onSaved={onSaved} onCancel={() => setModalVisible(false)} />
+                ) : (
+                    <AppointmentDetail appointment={detailAppointment} />
+                )}
+            </DetailModal>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-    header: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
-    card: { backgroundColor: '#f9f9f9', padding: 12, borderRadius: 8, marginBottom: 12 },
-    title: { fontSize: 18, fontWeight: 'bold' },
-    row: { flexDirection: 'row', gap: 8, marginTop: 8 },
-    addButton: { backgroundColor: '#007bff', padding: 12, borderRadius: 8, alignItems: 'center', marginBottom: 12 },
-    addButtonText: { color: '#fff', fontWeight: 'bold' },
+    container: { flex: 1, backgroundColor: colors.background, paddingTop: 12 },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    row: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
 });

@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
+import Card from '../../components/ui/Card';
+import EmptyState from '../../components/ui/EmptyState';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
+import { formatDisplayDateTime } from '../../utils/date';
 
 export default function PatientHistory() {
   const [diagnoses, setDiagnoses] = useState<any[]>([]);
@@ -24,27 +29,31 @@ export default function PatientHistory() {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={diagnoses}
-        keyExtractor={(i) => i.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.title}>{item.pet?.name || 'Sin mascota'}</Text>
-            <Text>{new Date(item.createdAt).toLocaleString()}</Text>
-            <Text>{item.description}</Text>
-            <Text>Veterinario: {item.veterinarian?.name || 'N/A'}</Text>
-          </View>
-        )}
-        refreshing={loading}
-        onRefresh={fetchDiagnoses}
-        ListEmptyComponent={() => <Text style={{ padding: 20 }}>No hay diagnósticos</Text>}
-      />
+      {loading && diagnoses.length === 0 ? (
+        <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>
+      ) : (
+        <FlatList
+          contentContainerStyle={{ padding: 12, paddingBottom: 24 }}
+          data={diagnoses}
+          keyExtractor={(i) => i.id}
+          renderItem={({ item }) => (
+            <Card>
+              <Text style={typography.h3}>{item.pet?.name || 'Sin mascota'}</Text>
+              <Text style={typography.subtitle}>{formatDisplayDateTime(item.createdAt)}</Text>
+              <Text style={[typography.body, { marginTop: 6 }]}>{item.description}</Text>
+              <Text style={typography.caption}>Veterinario: {item.veterinarian?.name || 'N/A'}</Text>
+            </Card>
+          )}
+          refreshing={loading}
+          onRefresh={fetchDiagnoses}
+          ListEmptyComponent={<EmptyState title="Sin diagnósticos" message="No hay diagnósticos" />}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  card: { padding: 12, margin: 8, backgroundColor: '#fff', borderRadius: 10 },
-  title: { fontWeight: 'bold' },
+  container: { flex: 1, backgroundColor: colors.background },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });

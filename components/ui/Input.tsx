@@ -1,5 +1,6 @@
 import React from 'react';
-import { TextInput, TextInputProps, StyleSheet } from 'react-native';
+import { StyleSheet, TextInput, TextInputProps } from 'react-native';
+import colors from '../../styles/colors';
 
 interface InputProps extends TextInputProps {
   style?: object;
@@ -13,12 +14,12 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 50,
-    borderColor: '#ccc',
+    borderColor: colors.lightGray,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 12,
     paddingHorizontal: 15,
     marginVertical: 8,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
 });

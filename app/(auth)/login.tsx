@@ -5,6 +5,7 @@ import axiosClient from '../../api/axiosClient';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { useSession } from '../../context/SessionContext';
+import { getApiErrorMessage } from '../../utils/apiError';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -26,8 +27,8 @@ export default function Login() {
       // Esperamos a que el contexto verifique la cookie y actualice el estado
       await login({ email, ...response.data });
       // Aquí la navegación la maneja automáticamente el SessionContext
-    } catch {
-      Alert.alert('Error', 'Credenciales inválidas');
+    } catch (err) {
+      Alert.alert('Error', getApiErrorMessage(err, 'Credenciales inválidas'));
     } finally {
       setLoading(false);
     }
@@ -38,9 +39,12 @@ export default function Login() {
       <Text style={styles.title}>Iniciar Sesión</Text>
       <Input placeholder="Correo electrónico" value={email} onChangeText={setEmail} style={styles.input} />
       <Input placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
-      <Button title={loading ? 'Cargando...' : 'Entrar'} onPress={onLogin} />
+  <Button title={loading ? 'Cargando...' : 'Entrar'} onPress={onLogin} disabled={loading} />
       <Text style={styles.registerText}>
         ¿No tienes cuenta? <Text style={styles.link} onPress={() => router.push('/(auth)/register')}>Regístrate</Text>
+      </Text>
+      <Text style={styles.registerText}>
+  ¿Olvidaste tu contraseña? <Text style={styles.link} onPress={() => router.push('/(auth)/forgot-password' as any)}>Recupérala</Text>
       </Text>
     </KeyboardAvoidingView>
   );

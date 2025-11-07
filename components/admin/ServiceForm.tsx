@@ -4,6 +4,7 @@ import axiosClient from '../../api/axiosClient';
 import ButtonUI from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import YesNoCheckbox from '../../components/ui/YesNoCheckbox';
+import { alertApiError } from '../../utils/apiError';
 
 export default function ServiceForm({ service, onSaved, onCancel }: { service?: any | null; onSaved: (s: any) => void; onCancel: () => void }) {
   const [loading, setLoading] = useState(false);
@@ -36,8 +37,8 @@ export default function ServiceForm({ service, onSaved, onCancel }: { service?: 
         res = await axiosClient.post('/api/admin/services', payload);
       }
       onSaved(res.data);
-    } catch {
-      Alert.alert('Error', 'No se pudo guardar el servicio');
+    } catch (err) {
+      alertApiError(err, 'No se pudo guardar el servicio');
     } finally {
       setLoading(false);
     }
@@ -55,7 +56,7 @@ export default function ServiceForm({ service, onSaved, onCancel }: { service?: 
       <YesNoCheckbox value={requiresVeterinarian} onChange={setRequiresVeterinarian} />
 
       <View style={styles.actions}>
-        <ButtonUI title={loading ? 'Guardando...' : (service?.id ? 'Guardar' : 'Registrar')} onPress={onSubmit} />
+  <ButtonUI title={loading ? 'Guardando...' : (service?.id ? 'Guardar' : 'Registrar')} onPress={onSubmit} disabled={loading} />
         <Button title="Cancelar" color="gray" onPress={onCancel} />
       </View>
     </KeyboardAvoidingView>

@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import PetDetailContent from '../../components/admin/PetDetailContent';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
 import DetailModal from '../../components/ui/DetailModal';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
 
 type Pet = {
   id: number;
@@ -80,76 +83,63 @@ export default function AllPets() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#333" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <>
+    <View style={styles.container}>
       <FlatList
         data={pets}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => openModal(item)}>
-            <View style={styles.petCard}>
-              <Text style={styles.name}>Nombre: {item.name}</Text>
-              <Text style={styles.items}>Dueño: {item.owner.name}</Text>
-              <Text style={styles.items}>Especie: {item.species}</Text>
+          <TouchableOpacity activeOpacity={0.85} onPress={() => openModal(item)}>
+            <Card>
+              <Text style={typography.h3}>Nombre: {item.name}</Text>
+              <Text style={typography.subtitle}>Dueño: {item.owner.name}</Text>
+              <Text style={[typography.body, { marginTop: 4 }]}>Especie: {item.species}</Text>
               {editingPetId === item.id ? (
-                <>
+                <View>
                   <TextInput
                     style={styles.input}
                     value={editedBreed}
                     onChangeText={setEditedBreed}
                   />
-                  <Button title="Guardar" onPress={() => saveBreed(item.id)} />
-                  <Button title="Cancelar" color="red" onPress={() => setEditingPetId(null)} />
-                </>
+                  <View style={styles.row}>
+                    <Button title="Guardar" onPress={() => saveBreed(item.id)} style={{ flex: 1, marginRight: 8 }} />
+                    <Button title="Cancelar" onPress={() => setEditingPetId(null)} style={{ backgroundColor: colors.danger, flex: 1, marginLeft: 8 }} />
+                  </View>
+                </View>
               ) : (
-                <>
-                  <Text style={styles.items}>Raza: {item.breed}</Text>
+                <View>
+                  <Text style={typography.body}>Raza: {item.breed}</Text>
                   <Button
                     title="Editar Raza"
                     onPress={() => {
                       setEditingPetId(item.id);
                       setEditedBreed(item.breed);
                     }}
+                    style={{ marginTop: 8 }}
                   />
-                </>
+                </View>
               )}
-            </View>
+            </Card>
           </TouchableOpacity>
         )}
       />
       <DetailModal visible={modalVisible} onClose={closeModal}>
         {selectedPet ? <PetDetailContent pet={selectedPet} /> : null}
       </DetailModal>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 16 },
-  petCard: {
-    marginBottom: 15,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  items: {
-    marginBottom: 5,
-  },
-  name: { fontWeight: 'bold', fontSize: 16, marginLeft: -3 },
   input: {
     borderWidth: 1,
     borderColor: '#999',
@@ -157,4 +147,5 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 5,
   },
+  row: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
 });

@@ -4,6 +4,9 @@ import axiosClient from '../../api/axiosClient';
 import UserDetailContent from '../../components/admin/UserDetailContent';
 import UserList from '../../components/admin/UserList';
 import DetailModal from '../../components/ui/DetailModal';
+import EmptyState from '../../components/ui/EmptyState';
+import colors from '../../styles/colors';
+import { alertApiError } from '../../utils/apiError';
 
 type User = {
   id: number;
@@ -28,8 +31,8 @@ export default function Users() {
     try {
       const response = await axiosClient.get<User[]>('/api/admin/users');
       setUsers(response.data);
-    } catch {
-      Alert.alert('Error', 'No se pudieron cargar los usuarios');
+    } catch (err) {
+      alertApiError(err, 'No se pudieron cargar los usuarios');
     } finally {
       setLoading(false);
     }
@@ -41,8 +44,8 @@ export default function Users() {
       const updatedUsers = users.map((u) => (u.id === userId ? { ...u, role: newRole } : u));
       setUsers(updatedUsers);
       Alert.alert('Éxito', 'Rol actualizado');
-    } catch {
-      Alert.alert('Error', 'No se pudo actualizar el rol');
+    } catch (err) {
+      alertApiError(err, 'No se pudo actualizar el rol');
     }
   };
 
@@ -53,8 +56,8 @@ export default function Users() {
       Alert.alert('Éxito', 'Usuario actualizado');
       // opcional: actualizar `selectedUser` si está activo
       setSelectedUser(prev => prev && prev.id === id ? { ...prev, ...data } : prev);
-    } catch {
-      Alert.alert('Error', 'No se pudo editar el usuario');
+    } catch (err) {
+      alertApiError(err, 'No se pudo editar el usuario');
     }
   };
 
@@ -71,24 +74,32 @@ export default function Users() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#333" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <>
-      <UserList
-        users={users}
-        onShowDetail={openModal}
-      />
+    <View style={styles.container}>
+      {users.length === 0 ? (
+        <EmptyState title="Sin usuarios" message="Aún no hay usuarios registrados." />
+      ) : (
+        <UserList users={users} onShowDetail={openModal} />
+      )}
       <DetailModal visible={modalVisible} onClose={closeModal}>
-        {selectedUser ? <UserDetailContent user={selectedUser} onChangeRole={updateRole} onUpdateUser={updateUser}/> : null}
+        {selectedUser ? (
+          <UserDetailContent
+            user={selectedUser}
+            onChangeRole={updateRole}
+            onUpdateUser={updateUser}
+          />
+        ) : null}
       </DetailModal>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });

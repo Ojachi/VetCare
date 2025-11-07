@@ -9,14 +9,21 @@ export default function OwnerLayout() {
 	const { user, isLoading } = useContext(SessionContext);
 	const router = useRouter();
 
-	useEffect(() => {
-		if (!isLoading) {
-			if (!user) {
-				router.replace('/(auth)/login' as any);
+		useEffect(() => {
+			if (!isLoading) {
+				if (!user) {
+					router.replace('/(auth)/login' as any);
+					return;
+				}
+				if (user.role !== 'OWNER') {
+					// Deny access and redirect according to role
+					if (user.role === 'ADMIN') router.replace('/(admin)' as any);
+					else if (user.role === 'EMPLOYEE') router.replace('/(employee)' as any);
+					else if (user.role === 'VETERINARIAN' || user.role === 'VET') router.replace('/(veterinarian)' as any);
+					else router.replace('/(auth)/login' as any);
+				}
 			}
-			// If user exists but not owner, we don't force navigation here; SessionContext handles role routing
-		}
-	}, [user, isLoading, router]);
+		}, [user, isLoading, router]);
 
 	if (isLoading) return (<View style={styles.center}><Text>Cargando...</Text></View>);
 
@@ -36,13 +43,17 @@ export default function OwnerLayout() {
 
 		return (
 			<>
-				<OwnerHeader />
+				<OwnerHeader title="VetCare" showCart />
 				<Tabs
 					screenOptions={({ route }) => ({
 						headerShown: false,
 						// hide tab button for routes not in the visible list
 						tabBarButton: visibleTabs.includes(route.name) ? undefined : () => null,
 						tabBarIcon: ({ color, size }) => iconFor(route.name, color, size),
+						tabBarActiveTintColor: '#2E8B57',
+						tabBarInactiveTintColor: '#6B7280',
+						tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#EEF2F3', height: 60, paddingBottom: 6 },
+						tabBarLabelStyle: { fontWeight: '600' },
 					})}
 				>
 					<Tabs.Screen name="index" options={{ title: 'Inicio' }} />
@@ -51,6 +62,13 @@ export default function OwnerLayout() {
 					<Tabs.Screen name="view-appointments" options={{ title: 'Citas' }} />
 					<Tabs.Screen name="view-diagnostics" options={{ title: 'Diagnósticos' }} />
 					<Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
+					{/* Hidden routes rendered on top of tabs */}
+					<Tabs.Screen name="register-pet" options={{ title: 'Registrar mascota' }} />
+					<Tabs.Screen name="edit-pet" options={{ title: 'Editar mascota' }} />
+					<Tabs.Screen name="pet-detail" options={{ title: 'Detalle de mascota' }} />
+					<Tabs.Screen name="products" options={{ title: 'Productos' }} />
+					<Tabs.Screen name="cart" options={{ title: 'Carrito' }} />
+					<Tabs.Screen name="product-detail" options={{ title: 'Detalle de producto' }} />
 				</Tabs>
 			</>
 		);
