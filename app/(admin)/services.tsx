@@ -83,23 +83,29 @@ export default function ServicesAdmin() {
           renderItem={({ item }) => (
             <TouchableOpacity activeOpacity={0.85} onPress={() => openDetail(item)}>
               <Card>
-                <Text style={typography.h3}>{item.name}</Text>
-                <Text style={typography.subtitle}>Precio: ${item.price} COP</Text>
-                <Text style={[typography.body, { marginTop: 4 }]}>Duración: {item.durationMinutes} min</Text>
-                <Text style={typography.caption}>
-                  Requiere Vet: {item.requiresVeterinarian ? 'Sí' : 'No'}
-                </Text>
-                <View style={styles.actionsRow}>
-                  <Button
-                    title="Editar"
-                    onPress={() => openForm(item)}
-                    style={{ backgroundColor: colors.secondary, flex: 1, marginRight: 8 }}
-                  />
-                  <Button
-                    title="Eliminar"
-                    onPress={() => onDelete(item.id)}
-                    style={{ backgroundColor: colors.danger, flex: 1, marginLeft: 8 }}
-                  />
+                <View style={styles.serviceRow}>
+                  <View style={styles.infoCol}>
+                    <Text style={typography.h3}>{item.name}</Text>
+                    <Text style={typography.subtitle}>Precio: ${item.price} COP</Text>
+                    <Text style={[typography.body, { marginTop: 4 }]}>Duración: {item.durationMinutes} min</Text>
+                    <Text style={typography.caption}>
+                      Requiere Vet: {item.requiresVeterinarian ? 'Sí' : 'No'}
+                    </Text>
+                  </View>
+                  <View style={styles.buttonCol}>
+                    <Button
+                      title="Editar"
+                      onPress={() => openForm(item)}
+                      style={styles.smallButtonSecondary}
+                      textStyle={styles.smallButtonText}
+                    />
+                    <Button
+                      title="Eliminar"
+                      onPress={() => onDelete(item.id)}
+                      style={styles.smallButtonDanger}
+                      textStyle={styles.smallButtonText}
+                    />
+                  </View>
                 </View>
               </Card>
             </TouchableOpacity>
@@ -127,5 +133,31 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   container: { flex: 1, backgroundColor: colors.background, paddingTop: 12 },
   list: { paddingHorizontal: 16, paddingBottom: 24 },
-  actionsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 }
+  actionsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+  serviceRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  infoCol: { flex: 1, paddingRight: 12 },
+  buttonCol: { width: 140, justifyContent: 'flex-start' },
+  smallButtonSecondary: {
+    backgroundColor: colors.secondary,
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  smallButtonDanger: {
+    backgroundColor: colors.danger,
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginTop: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  smallButtonText: { fontSize: 15, fontWeight: '600' },
 });

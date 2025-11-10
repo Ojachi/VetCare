@@ -13,6 +13,7 @@ export default function ServiceForm({ service, onSaved, onCancel }: { service?: 
   const [durationMinutes, setDurationMinutes] = useState(service?.durationMinutes ? String(service.durationMinutes) : '');
   const [requiresVeterinarian, setRequiresVeterinarian] = useState(!!service?.requiresVeterinarian);
   const [name, setName] = useState(service?.name ?? '');
+  const [descHeight, setDescHeight] = useState(100);
 
   useEffect(() => {
     setDescription(service?.description ?? '');
@@ -48,7 +49,15 @@ export default function ServiceForm({ service, onSaved, onCancel }: { service?: 
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
       <Text style={styles.title}>{service?.id ? 'Editar Servicio' : 'Registrar Servicio'}</Text>
       <Input placeholder="Nombre del servicio" value={name} onChangeText={setName} />
-      <Input placeholder="Descripción" value={description} onChangeText={setDescription} />
+      <Input
+        placeholder="Descripción"
+        value={description}
+        onChangeText={setDescription}
+        multiline
+        textAlignVertical="top"
+        onContentSizeChange={(e) => setDescHeight(e.nativeEvent.contentSize.height)}
+        style={[styles.textarea, { height: Math.max(100, descHeight) }]}
+      />
       <Input placeholder="Precio (COP)" value={price} onChangeText={setPrice} keyboardType="numeric" />
       <Input placeholder="Duración (minutos)" value={durationMinutes} onChangeText={setDurationMinutes} keyboardType="numeric" />
 
@@ -77,4 +86,5 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '700', marginBottom: 8, textAlign: 'center' },
   question: { fontSize: 15, marginTop: 8, marginBottom: 4 },
   actionsRow: { flexDirection: 'row', marginTop: 12 },
+  textarea: { minHeight: 100 },
 });
