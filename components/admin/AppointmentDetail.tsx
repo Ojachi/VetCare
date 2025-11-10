@@ -1,8 +1,7 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
-import Card from '../ui/Card';
 
 export default function AppointmentDetail({ appointment }: { appointment: any }) {
   const a = appointment ?? {};
@@ -12,53 +11,51 @@ export default function AppointmentDetail({ appointment }: { appointment: any })
   const vet = a.assignedTo ?? a.vet;
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-      <Card style={{ padding: 18 }}>
-        <Text style={typography.h3}>Detalle de la cita</Text>
-        <View style={styles.badgeRow}>
-          <View style={[styles.badge, badgeColor(a.status)]}>
-            <Text style={styles.badgeText}>{a.status ?? '—'}</Text>
-          </View>
+    <View style={styles.container}>
+      <Text style={[typography.h3, { marginBottom: 4 }]}>Detalle de la cita</Text>
+      <View style={styles.badgeRow}>
+        <View style={[styles.badge, badgeColor(a.status)]}>
+          <Text style={styles.badgeText}>{a.status ?? '—'}</Text>
         </View>
+      </View>
 
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Paciente</Text>
-          <Text style={styles.valueLine}><Text style={styles.label}>Nombre:</Text> {pet?.name ?? '—'}</Text>
-          <Text style={styles.valueLine}><Text style={styles.label}>Especie:</Text> {pet?.species ?? '—'}</Text>
-        </View>
+      <View style={styles.sectionBlock}>
+        <Text style={styles.sectionTitle}>Paciente</Text>
+        <Text style={styles.valueLine}><Text style={styles.label}>Nombre:</Text> {pet?.name ?? '—'}</Text>
+        <Text style={styles.valueLine}><Text style={styles.label}>Especie:</Text> {pet?.species ?? '—'}</Text>
+      </View>
 
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Propietario</Text>
-          <Text style={styles.valueLine}><Text style={styles.label}>Nombre:</Text> {owner?.name ?? '—'}</Text>
-          <Text style={styles.valueLine}><Text style={styles.label}>Tel:</Text> {owner?.phone ?? '—'}</Text>
-        </View>
+      <View style={styles.sectionBlock}>
+        <Text style={styles.sectionTitle}>Propietario</Text>
+        <Text style={styles.valueLine}><Text style={styles.label}>Nombre:</Text> {owner?.name ?? '—'}</Text>
+        <Text style={styles.valueLine}><Text style={styles.label}>Tel:</Text> {owner?.phone ?? '—'}</Text>
+      </View>
 
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Servicio</Text>
-          <Text style={styles.valueLine}>{service?.name ?? '—'}</Text>
-        </View>
+      <View style={styles.sectionBlock}>
+        <Text style={styles.sectionTitle}>Servicio</Text>
+        <Text style={styles.valueLine}>{service?.name ?? '—'}</Text>
+      </View>
 
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Veterinario</Text>
-          <Text style={styles.valueLine}>{vet?.name ?? '—'}</Text>
-        </View>
+      <View style={styles.sectionBlock}>
+        <Text style={styles.sectionTitle}>{vet ? 'Veterinario / Asignado' : 'Asignado'}</Text>
+        <Text style={styles.valueLine}>{vet?.name ?? '—'}</Text>
+      </View>
 
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Fecha</Text>
-          <Text style={styles.valueLine}>{a.startDateTime ?? a.date ?? '—'}</Text>
-        </View>
+      <View style={styles.sectionBlock}>
+        <Text style={styles.sectionTitle}>Fecha</Text>
+        <Text style={styles.valueLine}>{a.startDateTime ?? a.date ?? '—'}</Text>
+      </View>
 
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Nota</Text>
-          <Text style={styles.valueLine}>{a.note ?? '—'}</Text>
-        </View>
-      </Card>
-    </ScrollView>
+      <View style={styles.sectionBlock}>
+        <Text style={styles.sectionTitle}>Nota</Text>
+        <Text style={styles.valueLine}>{a.note?.length ? a.note : '—'}</Text>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContent: { padding: 12 },
+  container: { padding: 12 },
   sectionBlock: { marginTop: 14 },
   sectionTitle: { ...typography.subtitle, fontSize: 15 },
   valueLine: { ...typography.body, marginTop: 4 },

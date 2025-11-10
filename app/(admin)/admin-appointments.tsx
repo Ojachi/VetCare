@@ -23,6 +23,7 @@ export default function AdminAppointmentsScreen() {
     const [modalMode, setModalMode] = useState<'form'|'detail'>('form');
     const [editing, setEditing] = useState<any | null>(null);
     const [detailAppointment, setDetailAppointment] = useState<any | null>(null);
+    const [showFilters, setShowFilters] = useState(false);
 
     useEffect(() => {
         loadAppointments();
@@ -135,16 +136,18 @@ export default function AdminAppointmentsScreen() {
         const date = appointment?.startDateTime ?? appointment?.date ?? '';
     const status = appointment?.status ?? 'N/A';
     const statusNorm = String(status).toUpperCase();
-    const nonEditable = ['CONFIRMED','CANCELLED','ACCEPTED'];
+    // Estados que no permiten acciones. Tratar COMPLETED como CONFIRMED.
+    const nonEditable = ['CONFIRMED','CANCELLED','ACCEPTED','COMPLETED'];
+    const statusLabelEs = mapStatusToSpanish(statusNorm);
     const serviceName = appointment?.service?.name ?? '—';
 
         return (
             <TouchableOpacity activeOpacity={0.85} onPress={() => handleShowDetail(item)}>
                 <Card style={{ padding: 16 }}>
-                    <View style={styles.cardHeaderRow}>
-                      <Text style={[typography.h3, { flex: 1 }]} numberOfLines={1}>{petName}</Text>
-                      <View style={[styles.badge, badgeColor(statusNorm)]}><Text style={styles.badgeText}>{statusNorm}</Text></View>
-                    </View>
+                                        <View style={styles.cardHeaderRow}>
+                                            <Text style={[typography.h3, { flex: 1 }]} numberOfLines={1}>{petName}</Text>
+                                            <View style={[styles.badge, badgeColor(statusNorm)]}><Text style={styles.badgeText}>{statusLabelEs}</Text></View>
+                                        </View>
                     <Text style={typography.subtitle}>{formatDisplayDateTime(date)}</Text>
                     <Text style={[typography.caption, { marginTop: 4 }]}>Propietario: {ownerName}</Text>
                     <Text style={[typography.caption, { marginTop: 2 }]}>Servicio: {serviceName}</Text>
@@ -185,8 +188,9 @@ export default function AdminAppointmentsScreen() {
     return (
         <View style={styles.container}>
             <Text style={[typography.h2, { paddingHorizontal: 16, marginBottom: 8 }]}>Gestión de Citas</Text>
-            <View style={{ paddingHorizontal: 16 }}>
-                <Button title="+ Nueva Cita" onPress={handleCreate} />
+            <View style={{ paddingHorizontal: 16, flexDirection: 'row', gap: 12 }}>
+                <Button title="+ Nueva Cita" onPress={handleCreate} style={{ flex: 1 }} />
+                <Button title={showFilters ? 'Ocultar filtros' : 'Filtros'} onPress={() => setShowFilters(f => !f)} style={{ flex: 1, backgroundColor: colors.secondary }} textStyle={{ fontSize: 16 }} />
             </View>
 
                         {loading && appointments.length === 0 ? (
@@ -195,7 +199,7 @@ export default function AdminAppointmentsScreen() {
                 </View>
             ) : (
                                 <FlatList
-                                        ListHeaderComponent={(
+                                        ListHeaderComponent={showFilters ? (
                                             <Card style={{ marginHorizontal: 16, padding: 16 }}>
                                                 <Text style={typography.h3}>Filtros</Text>
                                                 <Text style={[typography.caption, { color: colors.darkGray, marginBottom: 8 }]}>Refina la lista de citas</Text>
@@ -219,7 +223,7 @@ export default function AdminAppointmentsScreen() {
                                                 </View>
                                                 <Button title="Limpiar" onPress={() => { setFilterStatus('ALL'); setFilterServiceId(null); }} style={{ backgroundColor: colors.secondary }} textStyle={{ fontSize: 14 }} />
                                             </Card>
-                                        )}
+                                        ) : null}
                                         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
                                         data={filtered}
                     keyExtractor={(item) => (item.id ?? item.appointment?.id)?.toString() ?? Math.random().toString()}
@@ -230,13 +234,17 @@ export default function AdminAppointmentsScreen() {
                 />
             )}
 
-            <DetailModal visible={modalVisible} onClose={() => setModalVisible(false)} showClose={false}>
-                {modalMode === 'form' ? (
-                    <AppointmentForm appointment={editing} onSaved={onSaved} onCancel={() => setModalVisible(false)} />
-                ) : (
-                    <AppointmentDetail appointment={detailAppointment} />
-                )}
-            </DetailModal>
+                        <DetailModal
+                            visible={modalVisible}
+                            onClose={() => setModalVisible(false)}
+                            showClose={modalMode === 'detail'}
+                        >
+                            {modalMode === 'form' ? (
+                                <AppointmentForm appointment={editing} onSaved={onSaved} onCancel={() => setModalVisible(false)} />
+                            ) : (
+                                <AppointmentDetail appointment={detailAppointment} />
+                            )}
+                        </DetailModal>
         </View>
     );
 }
@@ -261,5 +269,17 @@ function badgeColor(status: string) {
         case 'CANCELLED':
         case 'CANCELED': return { backgroundColor: colors.danger };
         default: return { backgroundColor: colors.darkGray };
+    }
+}
+
+function mapStatusToSpanish(status: string): string {
+    switch (status) {
+        case 'PENDING': return 'Pendiente';
+        case 'ACCEPTED': return 'Aceptada';
+        case 'CONFIRMED': return 'Confirmada';
+        case 'COMPLETED': return 'Completada';
+        case 'CANCELLED':
+        case 'CANCELED': return 'Cancelada';
+        default: return status;
     }
 }

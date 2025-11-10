@@ -46,7 +46,7 @@ export default function DateTimePickerInput({ date, onChange }: Props) {
         <Button
           title="Elegir fecha"
           onPress={() => setShowDatePicker(true)}
-          style={styles.smallBtn}
+          style={styles.smallBtnSecondary}
           textStyle={{ fontSize: 14 }}
         />
       </View>
@@ -61,7 +61,7 @@ export default function DateTimePickerInput({ date, onChange }: Props) {
         <Button
           title="Elegir hora"
           onPress={() => setShowTimePicker(true)}
-          style={styles.smallBtn}
+          style={styles.smallBtnSecondary}
           textStyle={{ fontSize: 14 }}
         />
       </View>
@@ -81,4 +81,5 @@ const styles = StyleSheet.create({
   container: { marginVertical: 10 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 4 },
   smallBtn: { paddingVertical: 10, paddingHorizontal: 12, minWidth: 120 },
+  smallBtnSecondary: { paddingVertical: 10, paddingHorizontal: 12, minWidth: 120, backgroundColor: colors.secondary },
 });

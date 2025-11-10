@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import axiosClient, { formatLocalDateTime } from '../../api/axiosClient';
 import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
 import DateTimePickerInput from '../../components/ui/DateTimePickerInput';
 import Input from '../../components/ui/Input';
 import colors from '../../styles/colors';
@@ -22,6 +21,7 @@ export default function AppointmentForm({
   const [pets, setPets] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [vets, setVets] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
 
   const [petId, setPetId] = useState<number | null>(appointment?.appointment?.pet?.id ?? null);
   const [serviceId, setServiceId] = useState<number | null>(appointment?.appointment?.service?.id ?? null);
@@ -40,8 +40,11 @@ export default function AppointmentForm({
         ]);
         setPets(petsRes.data);
         setServices(servicesRes.data);
-        const vetsOnly = (usersRes.data || []).filter((u: any) => u.role === 'VETERINARIAN');
-        setVets(vetsOnly);
+  const allUsers = usersRes.data || [];
+  const vetsOnly = allUsers.filter((u: any) => u.role === 'VETERINARIAN');
+  const employeesOnly = allUsers.filter((u: any) => u.role === 'EMPLOYEE');
+  setVets(vetsOnly);
+  setEmployees(employeesOnly);
       } catch (err) {
         alertApiError(err, 'No se pudieron cargar opciones para la cita');
       }
@@ -72,6 +75,7 @@ export default function AppointmentForm({
         res = await axiosClient.post('/api/appointments', payload);
       }
       onSaved(res.data);
+      console.log('Appointment saved:', res);
     } catch (err) {
       alertApiError(err, 'No se pudo guardar la cita');
     } finally {
@@ -79,8 +83,11 @@ export default function AppointmentForm({
     }
   };
 
+  const selectedService = services.find(s => s.id === serviceId);
+  const requiresVet = !!selectedService?.requiresVeterinarian;
+
   return (
-    <Card style={{ padding: 16 }}>
+    <View style={styles.formContainer}>
       <Text style={typography.h3}>{appointment?.id ? 'Editar cita' : 'Nueva cita'}</Text>
       <Text style={[typography.caption, { marginBottom: 8, color: colors.darkGray }]}>Completa los campos para gestionar la cita</Text>
 
@@ -104,21 +111,38 @@ export default function AppointmentForm({
         </Picker>
       </View>
 
-      <Text style={styles.label}>Veterinario (opcional)</Text>
-      <View style={styles.pickerBox}>
-        <Picker selectedValue={assignedToId} onValueChange={(v) => setAssignedToId(v)}>
-          <Picker.Item label="Sin asignar" value={null} />
-          {vets.map((v) => (
-            <Picker.Item key={v.id} label={v.name} value={v.id} />
-          ))}
-        </Picker>
-      </View>
+      {requiresVet ? (
+        <>
+          <Text style={styles.label}>Veterinario</Text>
+          <View style={styles.pickerBox}>
+            <Picker selectedValue={assignedToId} onValueChange={(v) => setAssignedToId(v)}>
+              <Picker.Item label="Selecciona veterinario" value={null} />
+              {vets.map((v) => (
+                <Picker.Item key={v.id} label={v.name} value={v.id} />
+              ))}
+            </Picker>
+          </View>
+        </>
+      ) : (
+        <>
+          <Text style={styles.label}>Empleado</Text>
+          <View style={styles.pickerBox}>
+            <Picker selectedValue={assignedToId} onValueChange={(v) => setAssignedToId(v)}>
+              <Picker.Item label="Selecciona empleado" value={null} />
+              {employees.map((e) => (
+                <Picker.Item key={e.id} label={e.name} value={e.id} />
+              ))}
+            </Picker>
+          </View>
+        </>
+      )}
 
-      <Text style={styles.label}>Fecha y hora</Text>
-      <DateTimePickerInput date={dateTime} onChange={setDateTime} />
+      <Text style={styles.label}>Fecha y hora </Text>
+      <Text style={styles.label}>Elige una fecha y hora 24 horas despues de la hora actual </Text>
+  <DateTimePickerInput date={dateTime} onChange={setDateTime} />
 
       <Text style={styles.label}>Nota/observaciones</Text>
-      <Input value={note} onChangeText={setNote} placeholder="Ej. Síntomas, solicitudes, etc." multiline />
+  <Input value={note} onChangeText={setNote} placeholder="Ej. Síntomas, solicitudes, etc." multiline textAlignVertical="top" style={{ minHeight: 90 }} />
 
       <View style={styles.actions}>
         <Button
@@ -126,18 +150,21 @@ export default function AppointmentForm({
           onPress={handleSave}
           disabled={loading}
           style={{ flex: 1, marginRight: 8 }}
+          textStyle={{ fontSize: 16 }}
         />
         <Button
           title="Cancelar"
           onPress={onCancel}
-          style={{ flex: 1, backgroundColor: colors.secondary }}
+          style={{ flex: 1, backgroundColor: colors.danger }}
+          textStyle={{ fontSize: 16 }}
         />
       </View>
-    </Card>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  formContainer: { padding: 16, paddingBottom: 24 },
   label: { ...typography.caption, marginTop: 10 },
   pickerBox: {
     borderWidth: 1,

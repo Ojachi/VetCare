@@ -73,8 +73,8 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const inAuthGroup = segments[0] === "(auth)";
     const inAdminGroup = segments[0] === "(admin)";
     const inOwnerGroup = segments[0] === "(owner)";
-  const inVetGroup = segments[0] === "(veterinarian)";
-  const inEmployeeGroup = segments[0] === "(employee)";
+    const inVetGroup = segments[0] === "(veterinarian)";
+    const inEmployeeGroup = segments[0] === "(employee)";
 
     if (!user && !inAuthGroup) {
       router.replace("/(auth)/login");
