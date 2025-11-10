@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, View, Text } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import EditUserForm from '../../components/admin/EditUserForm';
 import UserDetailContent from '../../components/admin/UserDetailContent';
@@ -8,6 +8,7 @@ import DetailModal from '../../components/ui/DetailModal';
 import EmptyState from '../../components/ui/EmptyState';
 import colors from '../../styles/colors';
 import { alertApiError } from '../../utils/apiError';
+import typography from '../../styles/typography';
 
 type User = {
   id: number;
@@ -92,6 +93,7 @@ export default function Users() {
 
   return (
     <View style={styles.container}>
+      <Text style={[typography.h2, { paddingHorizontal: 16 }]}>Gestión de Usuarios</Text>
       {users.length === 0 ? (
         <EmptyState title="Sin usuarios" message="Aún no hay usuarios registrados." />
       ) : (
@@ -120,6 +122,6 @@ export default function Users() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: 12 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });

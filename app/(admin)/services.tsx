@@ -107,7 +107,12 @@ export default function ServicesAdmin() {
         />
       )}
 
-      <DetailModal visible={modalVisible} onClose={() => setModalVisible(false)}>
+      <DetailModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        wide
+        showClose={modalMode !== 'form'}
+      >
         {modalMode === 'form' ? (
           <ServiceForm service={selectedService} onSaved={onSaved} onCancel={() => setModalVisible(false)} />
         ) : (

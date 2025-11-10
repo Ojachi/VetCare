@@ -9,14 +9,15 @@ type Props = {
   showClose?: boolean; // set false to hide default Close button
   closeText?: string;
   extraFooterButton?: { title: string; onPress: () => void; style?: ViewStyle; textStyle?: TextStyle };
+  wide?: boolean; // use wider max width
 };
 
-export default function DetailModal({ visible, onClose, children, showClose = true, closeText = 'Cerrar', extraFooterButton }: Props) {
+export default function DetailModal({ visible, onClose, children, showClose = true, closeText = 'Cerrar', extraFooterButton, wide = false }: Props) {
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.backdrop}>
-        <Card style={styles.modalCard}>
-          <View style={{ maxHeight: '80%' }}>{children}</View>
+        <Card style={[styles.modalCard, wide ? styles.modalCardWide : null]}>
+          <View style={styles.content}>{children}</View>
           {(showClose || extraFooterButton) ? (
             <View style={styles.footerRow}>
               {extraFooterButton ? (
@@ -41,6 +42,8 @@ export default function DetailModal({ visible, onClose, children, showClose = tr
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 24 },
-  modalCard: { padding: 18 },
+  modalCard: { padding: 18, width: '96%', alignSelf: 'center', maxWidth: 680 },
+  modalCardWide: { maxWidth: 840 },
+  content: { maxHeight: '88%', width: '100%', minHeight: 160 },
   footerRow: { flexDirection: 'row', alignItems: 'center' },
 });

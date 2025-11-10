@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import axiosClient from '../../api/axiosClient';
+import EditPetBreedForm from '../../components/admin/EditPetBreedForm';
 import PetDetailContent from '../../components/admin/PetDetailContent';
-import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import DetailModal from '../../components/ui/DetailModal';
 import colors from '../../styles/colors';
@@ -36,10 +35,9 @@ type Pet = {
 export default function AllPets() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingPetId, setEditingPetId] = useState<number | null>(null);
-  const [editedBreed, setEditedBreed] = useState('');
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [breedModalVisible, setBreedModalVisible] = useState(false);
 
   useEffect(() => {
     loadPets();
@@ -56,18 +54,12 @@ export default function AllPets() {
     }
   };
 
-  const saveBreed = async (petId: number) => {
-    try {
-      await axiosClient.put(`/api/pets/${petId}`, { breed: editedBreed });
-      const updatedPets = pets.map((p) =>
-        p.id === petId ? { ...p, breed: editedBreed } : p
-      );
-      setPets(updatedPets);
-      setEditingPetId(null);
-      Alert.alert('Éxito', 'Raza actualizada');
-    } catch {
-      Alert.alert('Error', 'No se pudo actualizar la raza');
-    }
+  const handleBreedSaved = (petId: number, newBreed: string) => {
+    const updatedPets = pets.map((p) => (p.id === petId ? { ...p, breed: newBreed } : p));
+    setPets(updatedPets);
+    // also reflect in the currently opened detail modal
+    setSelectedPet((prev) => (prev && prev.id === petId ? { ...prev, breed: newBreed } as Pet : prev));
+    setBreedModalVisible(false);
   };
 
   const openModal = (pet: Pet) => {
@@ -90,6 +82,7 @@ export default function AllPets() {
 
   return (
     <View style={styles.container}>
+      <Text style={[typography.h2, { paddingHorizontal: 16, marginBottom: 8 }]}>Gestión de Mascotas</Text>
       <FlatList
         data={pets}
         keyExtractor={(item) => item.id.toString()}
@@ -100,52 +93,41 @@ export default function AllPets() {
               <Text style={typography.h3}>Nombre: {item.name}</Text>
               <Text style={typography.subtitle}>Dueño: {item.owner.name}</Text>
               <Text style={[typography.body, { marginTop: 4 }]}>Especie: {item.species}</Text>
-              {editingPetId === item.id ? (
-                <View>
-                  <TextInput
-                    style={styles.input}
-                    value={editedBreed}
-                    onChangeText={setEditedBreed}
-                  />
-                  <View style={styles.row}>
-                    <Button title="Guardar" onPress={() => saveBreed(item.id)} style={{ flex: 1, marginRight: 8 }} />
-                    <Button title="Cancelar" onPress={() => setEditingPetId(null)} style={{ backgroundColor: colors.danger, flex: 1, marginLeft: 8 }} />
-                  </View>
-                </View>
-              ) : (
-                <View>
-                  <Text style={typography.body}>Raza: {item.breed}</Text>
-                  <Button
-                    title="Editar Raza"
-                    onPress={() => {
-                      setEditingPetId(item.id);
-                      setEditedBreed(item.breed);
-                    }}
-                    style={{ marginTop: 8 }}
-                  />
-                </View>
-              )}
+              <Text style={[typography.body, { marginTop: 2 }]}>Raza: {item.breed}</Text>
             </Card>
           </TouchableOpacity>
         )}
       />
-      <DetailModal visible={modalVisible} onClose={closeModal}>
+      <DetailModal
+        visible={modalVisible}
+        onClose={closeModal}
+        extraFooterButton={selectedPet ? {
+          title: 'Editar Raza',
+          onPress: () => setBreedModalVisible(true),
+          style: { backgroundColor: colors.secondary },
+        } : undefined}
+      >
         {selectedPet ? <PetDetailContent pet={selectedPet} /> : null}
+      </DetailModal>
+
+      {/* Secondary modal just for editing breed */}
+      <DetailModal visible={breedModalVisible} onClose={() => setBreedModalVisible(false)} showClose={false}>
+        {selectedPet ? (
+          <EditPetBreedForm
+            petId={selectedPet.id}
+            currentBreed={selectedPet.breed}
+            onCancel={() => setBreedModalVisible(false)}
+            onSaved={(newBreed: string) => handleBreedSaved(selectedPet.id, newBreed)}
+          />
+        ) : null}
       </DetailModal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: 12 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 16 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#999',
-    padding: 6,
-    marginVertical: 8,
-    borderRadius: 5,
-  },
   row: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
 });

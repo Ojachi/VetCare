@@ -2,8 +2,8 @@ import React, { ReactNode } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 import colors from '../../styles/colors';
 
-export default function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
-  return <View style={[styles.card, style]}>{children}</View>;
+export default function Card({ children, style }: { children: ReactNode; style?: ViewStyle | ViewStyle[] }) {
+  return <View style={[styles.card, style as any]}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
