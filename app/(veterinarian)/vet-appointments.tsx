@@ -1,3 +1,4 @@
+import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
@@ -13,6 +14,9 @@ import { formatDisplayDateTime } from '../../utils/date';
 
 export default function VetAppointments() {
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [filterStatus, setFilterStatus] = useState<'ALL' | string>('ALL');
+  const [filterServiceId, setFilterServiceId] = useState<number | null>(null);
+  const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { user } = useContext(SessionContext);
@@ -20,13 +24,16 @@ export default function VetAppointments() {
   const fetchAppointments = async () => {
     setLoading(true);
     try {
-      const res = await axiosClient.get('/api/appointments');
-      const all = res.data || [];
-      // filter by vet if logged user is a veterinarian
-      const filtered = (user && (user.role === 'VETERINARIAN' || user.role === 'VET'))
+      const [appsRes, servicesRes] = await Promise.all([
+        axiosClient.get('/api/appointments'),
+        axiosClient.get('/api/services'),
+      ]);
+      const all = appsRes.data || [];
+      const filteredByVet = (user && (user.role === 'VETERINARIAN' || user.role === 'VET'))
         ? all.filter((a: any) => a.assignedTo?.id === user.id)
         : all;
-      setAppointments(filtered);
+      setAppointments(filteredByVet);
+      setServices(servicesRes.data || []);
     } catch (err) {
       console.error(err);
       alertApiError(err, 'No se pudieron cargar las citas.');
@@ -40,46 +47,46 @@ export default function VetAppointments() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  const renderItem = ({ item }: { item: any }) => (
-    <Card>
-      <View style={styles.row}>
-        <View style={{ flex: 1 }}>
-          <Text style={typography.h3}>{item.pet?.name || 'Mascota desconocida'}</Text>
-          <Text style={typography.subtitle}>
-            {formatDisplayDateTime(item.startDateTime || item.scheduledAt)}
-          </Text>
-          <Text style={[typography.body, { marginTop: 6 }]}>Servicio: {item.service?.name}</Text>
-          <Text style={typography.caption}>Estado: {item.status}</Text>
+  const renderItem = ({ item }: { item: any }) => {
+    const statusNorm = String(item.status).toUpperCase();
+    return (
+      <Card style={{ padding: 16 }}>
+        <View style={styles.headerRow}>
+          <Text style={[typography.h3, { flex: 1 }]} numberOfLines={1}>{item.pet?.name || 'Mascota desconocida'}</Text>
+          <View style={[styles.badge, badgeColor(statusNorm)]}><Text style={styles.badgeText}>{statusNorm}</Text></View>
         </View>
-        <View style={styles.actions}>
+        <Text style={typography.subtitle}>{formatDisplayDateTime(item.startDateTime || item.scheduledAt)}</Text>
+        <Text style={[typography.caption, { marginTop: 4 }]}>Servicio: {item.service?.name ?? '—'}</Text>
+        <Text style={[typography.caption, { marginTop: 2 }]}>Propietario: {item.pet?.owner?.name ?? '—'}</Text>
+        <View style={styles.actionsRow}>
           <Button
             title="Confirmar"
             onPress={() => handleConfirm(item.id)}
-            style={{ backgroundColor: colors.success, paddingVertical: 10, marginVertical: 4 }}
+            style={{ backgroundColor: colors.success, flex: 1, marginRight: 6, paddingVertical: 10 }}
             textStyle={{ fontSize: 14 }}
           />
           <Button
             title="Completar"
             onPress={() => handleMarkDone(item.id)}
-            style={{ backgroundColor: colors.primary, paddingVertical: 10, marginVertical: 4 }}
+            style={{ backgroundColor: colors.primary, flex: 1, marginRight: 6, paddingVertical: 10 }}
             textStyle={{ fontSize: 14 }}
           />
           <Button
-            title="Diagnosticar"
+            title="Dx"
             onPress={() => handleDiagnose(item)}
-            style={{ backgroundColor: colors.warning, paddingVertical: 10, marginVertical: 4 }}
+            style={{ backgroundColor: colors.warning, flex: 1, marginRight: 6, paddingVertical: 10 }}
             textStyle={{ fontSize: 14 }}
           />
           <Button
             title="Cancelar"
             onPress={() => handleCancel(item.id)}
-            style={{ backgroundColor: colors.danger, paddingVertical: 10, marginVertical: 4 }}
+            style={{ backgroundColor: colors.danger, flex: 1, paddingVertical: 10 }}
             textStyle={{ fontSize: 14 }}
           />
         </View>
-      </View>
-    </Card>
-  );
+      </Card>
+    );
+  };
 
   const handleMarkDone = async (id: string) => {
     try {
@@ -126,6 +133,12 @@ export default function VetAppointments() {
     ]);
   };
 
+  const filtered = appointments.filter(a => {
+    const statusOk = filterStatus === 'ALL' || String(a.status).toUpperCase() === filterStatus;
+    const serviceOk = !filterServiceId || a.service?.id === filterServiceId;
+    return statusOk && serviceOk;
+  });
+
   return (
     <View style={styles.container}>
       {loading && appointments.length === 0 ? (
@@ -134,8 +147,33 @@ export default function VetAppointments() {
         </View>
       ) : (
         <FlatList
+          ListHeaderComponent={(
+            <Card style={{ marginHorizontal: 12, padding: 16 }}>
+              <Text style={typography.h3}>Filtros</Text>
+              <Text style={[typography.caption, { color: colors.darkGray, marginBottom: 8 }]}>Refina tus citas</Text>
+              <Text style={styles.filterLabel}>Estado</Text>
+              <View style={styles.pickerBox}>
+                <Picker selectedValue={filterStatus} onValueChange={(v) => setFilterStatus(v)}>
+                  <Picker.Item label="Todos" value="ALL" />
+                  <Picker.Item label="Pendiente" value="PENDING" />
+                  <Picker.Item label="Aceptada" value="ACCEPTED" />
+                  <Picker.Item label="Confirmada" value="CONFIRMED" />
+                  <Picker.Item label="Completada" value="COMPLETED" />
+                  <Picker.Item label="Cancelada" value="CANCELLED" />
+                </Picker>
+              </View>
+              <Text style={styles.filterLabel}>Servicio</Text>
+              <View style={styles.pickerBox}>
+                <Picker selectedValue={filterServiceId} onValueChange={(v) => setFilterServiceId(v)}>
+                  <Picker.Item label="Todos" value={null} />
+                  {services.map((s:any) => <Picker.Item key={s.id} label={s.name} value={s.id} />)}
+                </Picker>
+              </View>
+              <Button title="Limpiar" onPress={() => { setFilterStatus('ALL'); setFilterServiceId(null); }} style={{ backgroundColor: colors.secondary }} textStyle={{ fontSize: 14 }} />
+            </Card>
+          )}
           contentContainerStyle={{ padding: 12, paddingBottom: 24 }}
-          data={appointments}
+          data={filtered}
           keyExtractor={(i) => i.id}
           renderItem={renderItem}
           refreshing={loading}
@@ -150,6 +188,22 @@ export default function VetAppointments() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  actions: { justifyContent: 'center', width: 140, marginLeft: 8 },
+  actionsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 16 },
+  badgeText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  pickerBox: { borderWidth: 1, borderColor: '#EEF2F3', borderRadius: 12, backgroundColor: colors.white, marginTop: 6, marginBottom: 12, overflow: 'hidden' },
+  filterLabel: { ...typography.caption, marginTop: 4 },
 });
+
+function badgeColor(status: string) {
+  switch (status) {
+    case 'PENDING': return { backgroundColor: colors.secondary };
+    case 'ACCEPTED': return { backgroundColor: colors.success };
+    case 'CONFIRMED': return { backgroundColor: colors.primary };
+    case 'COMPLETED': return { backgroundColor: '#2d9d78' };
+    case 'CANCELLED':
+    case 'CANCELED': return { backgroundColor: colors.danger };
+    default: return { backgroundColor: colors.darkGray };
+  }
+}

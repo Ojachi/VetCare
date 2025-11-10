@@ -13,10 +13,7 @@ export default function WelcomeScreen() {
       <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
         {/* HERO */}
         <ImageBackground
-          source={{
-            uri:
-              'https://images.unsplash.com/photo-1558944351-c6ae4f1ea94f?q=80&w=1600&auto=format&fit=crop',
-          }}
+          source={require('../../assets/images/background.jpg')}
           style={styles.heroBg}
           imageStyle={styles.bgImage}
         >
@@ -27,8 +24,6 @@ export default function WelcomeScreen() {
               <Text style={[typography.h1, { color: colors.white }]}>VetCare</Text>
               <Text style={[typography.subtitle, styles.subtitle]}>Cuidado veterinario sencillo, rápido y humano.</Text>
             </View>
-
-            {/* Botones principales removidos del héroe; quedan solo al final */}
           </View>
         </ImageBackground>
 
@@ -46,11 +41,6 @@ export default function WelcomeScreen() {
               <Text style={styles.featureTitle}>Historial y diagnósticos</Text>
               <Text style={styles.featureText}>Consulta tratamientos y medicamentos.</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.featureCard} activeOpacity={0.9} onPress={() => router.push('/(auth)/products' as any)}>
-              <Ionicons name="cart" size={26} color={colors.primary} />
-              <Text style={styles.featureTitle}>Productos para tu mascota</Text>
-              <Text style={styles.featureText}>Compra lo esencial desde la app.</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -65,7 +55,7 @@ export default function WelcomeScreen() {
             <Button title="Ver productos" onPress={() => router.push('/(auth)/products' as any)} />
           </View>
           <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1544568100-847a948585b9?q=80&w=1200&auto=format&fit=crop' }}
+            source={require('../../assets/images/perro_producto.avif')}
             style={styles.promoImg}
           />
         </View>
@@ -75,12 +65,11 @@ export default function WelcomeScreen() {
           <View style={styles.galleryCard}>
             <Text style={styles.sectionTitle}>Amigos felices</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.galleryRow}>
-              {[
-                'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?q=80&w=1200&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=80&w=1200&auto=format&fit=crop',
+              {[require('../../assets/images/perro.avif'),
+                require('../../assets/images/perro2.avif'),
+                require('../../assets/images/gato.avif'),
               ].map((uri) => (
-                <Image key={uri} source={{ uri }} style={styles.galleryImg} />
+                <Image key={uri} source={uri} style={styles.galleryImg} />
               ))}
             </ScrollView>
           </View>
@@ -128,7 +117,7 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1 },
   heroBg: { minHeight: 420 },
   bgImage: { width: '100%', height: '100%' },
   overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },

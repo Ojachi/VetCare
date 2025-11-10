@@ -1,11 +1,9 @@
-import {
-    FontAwesome5,
-    MaterialIcons,
-} from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import React, { useContext, useEffect } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import AdminHeader from "../../components/ui/AdminHeader";
+import ScreenBackground from "../../components/ui/ScreenBackground";
 import { SessionContext } from "../../context/SessionContext";
 
 export default function AdminLayout() {
@@ -29,14 +27,16 @@ export default function AdminLayout() {
 
   if (isLoading) {
     return (
-      <View style={styles.center}>
-        <Text>Cargando...</Text>
-      </View>
+      <ScreenBackground>
+        <View style={styles.center}>
+          <Text>Cargando...</Text>
+        </View>
+      </ScreenBackground>
     );
   }
 
   return (
-    <>
+    <ScreenBackground>
       <AdminHeader title="Administración" />
       <Tabs
         screenOptions={{
@@ -107,12 +107,21 @@ export default function AdminLayout() {
             headerShown: false,
           }}
         />
+        <Tabs.Screen
+          name="products"
+          options={{
+            title: "Productos",
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome5 name="shopping-cart" color={color} size={size} />
+            ),
+            headerShown: false,
+          }}
+        />
       </Tabs>
-    </>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fafafa" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 });

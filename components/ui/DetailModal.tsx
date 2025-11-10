@@ -1,19 +1,31 @@
 import React from 'react';
-import { Button, Modal, StyleSheet, View } from 'react-native';
+import { Modal, StyleSheet, View } from 'react-native';
+import Button from './Button';
+import Card from './Card';
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  children?: React.ReactNode;
+  showClose?: boolean; // set false to hide default Close button
+  closeText?: string;
+};
 
-export default function DetailModal({ visible, onClose, children }: { visible: boolean; onClose: () => void; children?: React.ReactNode }) {
+export default function DetailModal({ visible, onClose, children, showClose = true, closeText = 'Cerrar' }: Props) {
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.container}>
-        {children}
-        <View style={{ marginTop: 12 }}>
-          <Button title="Cerrar" onPress={onClose} />
-        </View>
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+      <View style={styles.backdrop}>
+        <Card style={styles.modalCard}>
+          <View style={{ maxHeight: '80%' }}>{children}</View>
+          {showClose ? (
+            <Button title={closeText} onPress={onClose} style={{ marginTop: 16 }} textStyle={{ fontSize: 16 }} />
+          ) : null}
+        </Card>
       </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 24 },
+  modalCard: { padding: 18 },
 });

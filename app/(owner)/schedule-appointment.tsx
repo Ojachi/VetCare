@@ -2,10 +2,11 @@ import DateTimePickerInput from '@/components/ui/DateTimePickerInput';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import axiosClient, { formatLocalDateTime } from '../../api/axiosClient';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import Input from '../../components/ui/Input';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import { alertApiError } from '../../utils/apiError';
@@ -28,6 +29,7 @@ export default function ScheduleAppointment() {
   const [serviceId, setServiceId] = useState<number | null>(null); // podrías tener un picker para servicios también
   const [assignedToId, setAssignedToId] = useState<number | null>(null); // idem para veterinarios
   const [services, setServices] = useState<Service[]>([]);
+  const [vets, setVets] = useState<{ id: number; name: string }[]>([]);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -63,8 +65,9 @@ export default function ScheduleAppointment() {
     const fetchUsers = async () => {
       try {
         const res = await axiosClient.get<any[]>('/api/users');
-        const vets = res.data.filter((u: any) => u.role === 'VETERINARIAN');
-        setAssignedToId(vets.length ? vets[0].id : null);
+        const onlyVets = res.data.filter((u: any) => u.role === 'VETERINARIAN');
+        setVets(onlyVets);
+        setAssignedToId(onlyVets.length ? onlyVets[0].id : null);
       } catch {
         // ignore
       }
@@ -106,52 +109,52 @@ export default function ScheduleAppointment() {
 
   return (
     <View style={styles.container}>
-      <Card>
-        <View style={{ marginBottom: 12 }}>
-          <TextInput editable={false} style={[styles.title, { color: colors.darkGray }]} value={"Agendar Cita"} />
-        </View>
-      <Picker
-        selectedValue={selectedPetId}
-        onValueChange={(value) => setSelectedPetId(value)}
-        style={styles.input}
-      >
-        <Picker.Item label="Selecciona una mascota" value={null} />
-        {pets.map((pet) => (
-          <Picker.Item key={pet.id} label={pet.name} value={pet.id} />
-        ))}
-      </Picker>
-      
-      <Picker
-        selectedValue={serviceId}
-        onValueChange={(value) => setServiceId(value)}
-        style={styles.input}
-      >
-        <Picker.Item label="Selecciona un servicio" value={null} />
-        {services.map((service) => (
-          <Picker.Item key={service.id} label={service.name} value={service.id} />
-        ))}
-      </Picker>
-      <TextInput
-        style={styles.input}
-        placeholder="ID Veterinario asignado (ej: 2)"
-        value={assignedToId ? String(assignedToId) : ''}
-        onChangeText={(value) => setAssignedToId(Number(value) || null)}
-        keyboardType="numeric"
-      />
-      <DateTimePickerInput date={dateTime} onChange={setDateTime} />
-      <TextInput
-        style={styles.input}
-        placeholder="Observaciones"
-        value={note}
-        onChangeText={setNote}
-      />
-  <Button title={loading ? 'Agendando...' : 'Agendar'} onPress={handleSubmit} disabled={loading} />
+      <Card style={{ padding: 16 }}>
+        <Text style={[typography.h2, { textAlign: 'center' }]}>Agendar Cita</Text>
+        <Text style={[typography.caption, { textAlign: 'center', color: colors.darkGray, marginBottom: 12 }]}>Completa los datos para tu próxima visita</Text>
 
-      <Button
-        title="Ver mis citas"
-        onPress={() => router.push('/(owner)/view-appointments' as any)}
-        style={{ backgroundColor: colors.secondary }}
-      />
+        <Text style={styles.label}>Mascota</Text>
+        <View style={styles.pickerBox}>
+          <Picker selectedValue={selectedPetId} onValueChange={(value) => setSelectedPetId(value)}>
+            <Picker.Item label="Selecciona una mascota" value={null} />
+            {pets.map((pet) => (
+              <Picker.Item key={pet.id} label={pet.name} value={pet.id} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Servicio</Text>
+        <View style={styles.pickerBox}>
+          <Picker selectedValue={serviceId} onValueChange={(value) => setServiceId(value)}>
+            <Picker.Item label="Selecciona un servicio" value={null} />
+            {services.map((service) => (
+              <Picker.Item key={service.id} label={service.name} value={service.id} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Veterinario</Text>
+        <View style={styles.pickerBox}>
+          <Picker selectedValue={assignedToId} onValueChange={(value) => setAssignedToId(value)}>
+            {vets.length === 0 && <Picker.Item label="Sin veterinarios disponibles" value={null} />}
+            {vets.map((v) => (
+              <Picker.Item key={v.id} label={v.name} value={v.id} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Fecha y hora</Text>
+        <DateTimePickerInput date={dateTime} onChange={setDateTime} />
+
+        <Text style={styles.label}>Observaciones</Text>
+        <Input placeholder="Ej. síntomas, preferencias, etc." value={note} onChangeText={setNote} multiline />
+
+        <Button title={loading ? 'Agendando...' : 'Agendar'} onPress={handleSubmit} disabled={loading} />
+        <Button
+          title="Ver mis citas"
+          onPress={() => router.push('/(owner)/view-appointments' as any)}
+          style={{ backgroundColor: colors.secondary }}
+        />
       </Card>
     </View>
   );
@@ -161,20 +164,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: colors.background,
     justifyContent: 'center',
   },
   title: {
     ...typography.h2,
     textAlign: 'center',
   },
-  input: {
+  label: { ...typography.caption, marginTop: 6 },
+  pickerBox: {
     borderWidth: 1,
     borderColor: '#EEF2F3',
     borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
     backgroundColor: colors.white,
+    marginTop: 6,
+    marginBottom: 8,
+    overflow: 'hidden',
   },
 });

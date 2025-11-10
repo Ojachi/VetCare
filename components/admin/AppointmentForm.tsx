@@ -1,8 +1,13 @@
 import { Picker } from '@react-native-picker/picker';
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import axiosClient, { formatLocalDateTime } from '../../api/axiosClient';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
 import DateTimePickerInput from '../../components/ui/DateTimePickerInput';
+import Input from '../../components/ui/Input';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
 import { alertApiError } from '../../utils/apiError';
 
 export default function AppointmentForm({
@@ -75,48 +80,73 @@ export default function AppointmentForm({
   };
 
   return (
-    <View style={styles.container}>
+    <Card style={{ padding: 16 }}>
+      <Text style={typography.h3}>{appointment?.id ? 'Editar cita' : 'Nueva cita'}</Text>
+      <Text style={[typography.caption, { marginBottom: 8, color: colors.darkGray }]}>Completa los campos para gestionar la cita</Text>
+
       <Text style={styles.label}>Mascota</Text>
-      <Picker selectedValue={petId} onValueChange={(v) => setPetId(v)}>
-        <Picker.Item label="Selecciona mascota" value={null} />
-        {pets.map((p) => (
-          <Picker.Item key={p.id} label={p.name} value={p.id} />
-        ))}
-      </Picker>
+      <View style={styles.pickerBox}>
+        <Picker selectedValue={petId} onValueChange={(v) => setPetId(v)}>
+          <Picker.Item label="Selecciona mascota" value={null} />
+          {pets.map((p) => (
+            <Picker.Item key={p.id} label={p.name} value={p.id} />
+          ))}
+        </Picker>
+      </View>
 
       <Text style={styles.label}>Servicio</Text>
-      <Picker selectedValue={serviceId} onValueChange={(v) => setServiceId(v)}>
-        <Picker.Item label="Selecciona servicio" value={null} />
-        {services.map((s) => (
-          <Picker.Item key={s.id} label={s.name} value={s.id} />
-        ))}
-      </Picker>
+      <View style={styles.pickerBox}>
+        <Picker selectedValue={serviceId} onValueChange={(v) => setServiceId(v)}>
+          <Picker.Item label="Selecciona servicio" value={null} />
+          {services.map((s) => (
+            <Picker.Item key={s.id} label={s.name} value={s.id} />
+          ))}
+        </Picker>
+      </View>
 
       <Text style={styles.label}>Veterinario (opcional)</Text>
-      <Picker selectedValue={assignedToId} onValueChange={(v) => setAssignedToId(v)}>
-        <Picker.Item label="Sin asignar" value={null} />
-        {vets.map((v) => (
-          <Picker.Item key={v.id} label={v.name} value={v.id} />
-        ))}
-      </Picker>
+      <View style={styles.pickerBox}>
+        <Picker selectedValue={assignedToId} onValueChange={(v) => setAssignedToId(v)}>
+          <Picker.Item label="Sin asignar" value={null} />
+          {vets.map((v) => (
+            <Picker.Item key={v.id} label={v.name} value={v.id} />
+          ))}
+        </Picker>
+      </View>
 
       <Text style={styles.label}>Fecha y hora</Text>
       <DateTimePickerInput date={dateTime} onChange={setDateTime} />
 
       <Text style={styles.label}>Nota/observaciones</Text>
-      <TextInput style={styles.input} value={note} onChangeText={setNote} />
+      <Input value={note} onChangeText={setNote} placeholder="Ej. Síntomas, solicitudes, etc." multiline />
 
       <View style={styles.actions}>
-        <Button title={appointment?.id ? 'Guardar cambios' : 'Crear cita'} onPress={handleSave} disabled={loading} />
-        <Button title="Cancelar" color="gray" onPress={onCancel} />
+        <Button
+          title={appointment?.id ? 'Guardar cambios' : 'Crear cita'}
+          onPress={handleSave}
+          disabled={loading}
+          style={{ flex: 1, marginRight: 8 }}
+        />
+        <Button
+          title="Cancelar"
+          onPress={onCancel}
+          style={{ flex: 1, backgroundColor: colors.secondary }}
+        />
       </View>
-    </View>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 12 },
-  label: { fontSize: 14, fontWeight: '600', marginTop: 8 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 8, marginTop: 6 },
-  actions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
+  label: { ...typography.caption, marginTop: 10 },
+  pickerBox: {
+    borderWidth: 1,
+    borderColor: '#EEF2F3',
+    borderRadius: 12,
+    backgroundColor: colors.white,
+    marginTop: 6,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
 });

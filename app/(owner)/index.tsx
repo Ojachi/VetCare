@@ -10,6 +10,7 @@ const buttons = [
   { label: 'Mis Citas', path: '/(owner)/view-appointments', color: '#3498db', icon: require('../../assets/images/admin_appointments.png') },
   { label: 'Diagnósticos', path: '/(owner)/view-diagnostics', color: '#9b59b6', icon: require('../../assets/images/admin_medical_records.png') },
   { label: 'Perfil', path: '/(owner)/profile', color: '#e67e22', icon: require('../../assets/images/admin_users.png') },
+  { label: 'Productos', path: '/(owner)/products', color: '#f39c12', icon: require('../../assets/images/admin_products.png') },
 ];
 
 export default function OwnerHome() {

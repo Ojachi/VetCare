@@ -1,9 +1,10 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
+import { ensureDataUri } from '../../utils/image';
 
 export default function ProductDetail({ product }: { product: any }) {
   if (!product) return null;
-  const img = product.image ? { uri: product.image } : undefined;
+  const img = product.image ? { uri: ensureDataUri(product.image) } : undefined;
   return (
     <View style={styles.container}>
       {img ? <Image source={img} style={styles.image} resizeMode="cover" /> : null}

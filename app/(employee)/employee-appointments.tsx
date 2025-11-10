@@ -128,6 +128,7 @@ export default function EmployeeAppointments() {
       <DetailModal visible={rescheduleVisible} onClose={() => setRescheduleVisible(false)}>
         <View style={{ gap: 12 }}>
           <Text style={typography.h3}>Reprogramar cita</Text>
+          <Text style={typography.caption}>Elige la nueva fecha y hora</Text>
           <DateTimePickerInput date={newDate} onChange={setNewDate} />
           <Button
             title="Guardar"

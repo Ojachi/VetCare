@@ -6,6 +6,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import { alertApiError } from '../../utils/apiError';
+import { ensureDataUri } from '../../utils/image';
 
 export default function ProductsCatalog() {
   const [products, setProducts] = useState<any[]>([]);
@@ -38,7 +39,7 @@ export default function ProductsCatalog() {
 
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity style={styles.card} onPress={() => router.push({ pathname: '/(owner)/product-detail', params: { id: String(item.id) } } as any)}>
-      {item.image ? <Image source={{ uri: item.image }} style={styles.thumb} /> : <View style={[styles.thumb, styles.thumbPlaceholder]} />}
+  {item.image ? <Image source={{ uri: ensureDataUri(item.image) }} style={styles.thumb} /> : <View style={[styles.thumb, styles.thumbPlaceholder]} />}
   <Text style={[typography.body, styles.name]} numberOfLines={1}>{item.name}</Text>
   <Text style={styles.price}>${Number(item.price).toLocaleString('es-CO')} COP</Text>
     </TouchableOpacity>

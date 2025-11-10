@@ -7,8 +7,9 @@ export default function RootLayout() {
   return (
     <SessionProvider>
       <CartProvider>
-        <Slot/>
+        <Slot />
       </CartProvider>
     </SessionProvider>
   );
 }
+ 

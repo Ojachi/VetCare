@@ -6,7 +6,8 @@ const colors = {
   danger: '#e74c3c',
   warning: '#f39c12',
   white: '#ffffff',
-  background: '#F6FBF9',
+  // Make global backgrounds translucent to let the root background image be visible
+  background: 'transparent',
   lightGray: '#EEF2F3',
   darkGray: '#1F2937',
   muted: '#6B7280',

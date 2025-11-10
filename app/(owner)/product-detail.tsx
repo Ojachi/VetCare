@@ -8,6 +8,7 @@ import { useCart } from '../../context/CartContext';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import { alertApiError } from '../../utils/apiError';
+import { ensureDataUri } from '../../utils/image';
 
 export default function ProductDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -37,7 +38,7 @@ export default function ProductDetailPage() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {product.image ? <Image source={{ uri: product.image }} style={styles.image} /> : null}
+  {product.image ? <Image source={{ uri: ensureDataUri(product.image) }} style={styles.image} /> : null}
       <Card>
         <Text style={[typography.h2, { marginBottom: 4 }]}>{product.name}</Text>
         <Text style={styles.price}>${Number(product.price).toLocaleString('es-CO')} COP</Text>

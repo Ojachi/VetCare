@@ -3,6 +3,7 @@ import { Tabs, useRouter } from 'expo-router';
 import React, { useContext, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import VetHeader from '../../components/ui/AdminHeader';
+import ScreenBackground from '../../components/ui/ScreenBackground';
 import { SessionContext } from '../../context/SessionContext';
 
 export default function VetLayout() {
@@ -24,12 +25,16 @@ export default function VetLayout() {
 			}
 		}, [user, isLoading, router]);
 
-	if (isLoading) return (<View style={styles.center}><Text>Cargando...</Text></View>);
+	if (isLoading) return (
+		<ScreenBackground>
+			<View style={styles.center}><Text>Cargando...</Text></View>
+		</ScreenBackground>
+	);
 
 	return (
-		<>
-			<VetHeader title="Veterinario" />
-			<Tabs
+			<ScreenBackground>
+				<VetHeader title="Veterinario" />
+				<Tabs
 				screenOptions={({ route }) => ({
 					headerShown: false,
 					tabBarActiveTintColor: '#2E8B57',
@@ -50,8 +55,8 @@ export default function VetLayout() {
 				<Tabs.Screen name="vet-appointments" options={{ title: 'Citas' }} />
 				<Tabs.Screen name="patient-history" options={{ title: 'Pacientes' }} />
 				<Tabs.Screen name="register-diagnosis" options={{ title: 'Registrar Dx' }} />
-			</Tabs>
-		</>
+				</Tabs>
+			</ScreenBackground>
 	);
 }
 

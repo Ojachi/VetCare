@@ -1,7 +1,7 @@
 import LogoutButton from '@/components/ui/LogoutButton';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const adminPaths = [
@@ -10,6 +10,7 @@ const adminPaths = [
   '/(admin)/services',
   '/(admin)/admin-appointments',
   '/(admin)/medical-records',
+  '/(admin)/products',
 
 ] as const;
 
@@ -51,15 +52,21 @@ const buttons: {
     icon: require('../../assets/images/admin_medical_records.png'),
     path: '/(admin)/medical-records',
   },
+  {
+    label: 'Productos',
+    color: '#f39c12',
+    icon: require('../../assets/images/admin_products.png'),
+    path: '/(admin)/products',
+  }
 ];
 
 export default function AdminHome() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.grid}>
-        {buttons.map((btn, idx) => (
+        {buttons.map((btn) => (
           <TouchableOpacity
             key={btn.label}
             style={[styles.button, { backgroundColor: btn.color }]}
@@ -70,14 +77,13 @@ export default function AdminHome() {
           </TouchableOpacity>
         ))}
       </View>
-      
-      <LogoutButton style={styles.logout}/>
-    </View>
+      <LogoutButton style={styles.logout} />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'flex-start', alignItems: 'center', paddingTop: 30 },
+  container: { justifyContent: 'flex-start', alignItems: 'center', paddingTop: 30, paddingBottom: 40 },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

@@ -2,6 +2,7 @@ import { Stack, useRouter } from 'expo-router';
 import React, { useContext, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import AdminHeader from '../../components/ui/AdminHeader';
+import ScreenBackground from '../../components/ui/ScreenBackground';
 import { SessionContext } from '../../context/SessionContext';
 
 export default function EmployeeLayout() {
@@ -23,13 +24,17 @@ export default function EmployeeLayout() {
 		}
 	}, [user, isLoading, router]);
 
-	if (isLoading) return (<View style={styles.center}><Text>Cargando...</Text></View>);
+	if (isLoading) return (
+		<ScreenBackground>
+			<View style={styles.center}><Text>Cargando...</Text></View>
+		</ScreenBackground>
+	);
 
 	return (
-		<>
+		<ScreenBackground>
 			<AdminHeader title="Empleado" />
 			<Stack screenOptions={{ headerShown: false }} />
-		</>
+		</ScreenBackground>
 	);
 }
 

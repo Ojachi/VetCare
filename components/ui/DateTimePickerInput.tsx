@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { View, Button, Platform, StyleSheet, Text } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
+import Button from './Button';
 
 type Props = {
   date: Date;
@@ -33,11 +36,35 @@ export default function DateTimePickerInput({ date, onChange }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text>Fecha seleccionada: {date.toLocaleDateString()}</Text>
-      <Button title="Seleccionar Fecha" onPress={() => setShowDatePicker(true)} />
+      <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <Text style={typography.caption}>Fecha</Text>
+          <Text style={[typography.body, { color: colors.darkGray }]}>
+            {date.toLocaleDateString()}
+          </Text>
+        </View>
+        <Button
+          title="Elegir fecha"
+          onPress={() => setShowDatePicker(true)}
+          style={styles.smallBtn}
+          textStyle={{ fontSize: 14 }}
+        />
+      </View>
 
-      <Text>Hora seleccionada: {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-      <Button title="Seleccionar Hora" onPress={() => setShowTimePicker(true)} />
+      <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <Text style={typography.caption}>Hora</Text>
+          <Text style={[typography.body, { color: colors.darkGray }]}>
+            {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+        </View>
+        <Button
+          title="Elegir hora"
+          onPress={() => setShowTimePicker(true)}
+          style={styles.smallBtn}
+          textStyle={{ fontSize: 14 }}
+        />
+      </View>
 
       {showDatePicker && (
         <DateTimePicker value={date} mode="date" display="default" onChange={onChangeDate} />
@@ -52,4 +79,6 @@ export default function DateTimePickerInput({ date, onChange }: Props) {
 
 const styles = StyleSheet.create({
   container: { marginVertical: 10 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 4 },
+  smallBtn: { paddingVertical: 10, paddingHorizontal: 12, minWidth: 120 },
 });
