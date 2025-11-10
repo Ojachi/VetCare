@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
+import EditUserForm from '../../components/admin/EditUserForm';
 import UserDetailContent from '../../components/admin/UserDetailContent';
 import UserList from '../../components/admin/UserList';
 import DetailModal from '../../components/ui/DetailModal';
@@ -22,6 +23,7 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -51,11 +53,11 @@ export default function Users() {
 
   const updateUser = async (id: number, data: Partial<User>) => {
     try {
-      await axiosClient.put(`/api/users/${id}`, data); // asume endpoint RESTful
+      await axiosClient.put(`/api/users/${id}`, data);
       setUsers(users.map(u => u.id === id ? { ...u, ...data } : u));
-      Alert.alert('Éxito', 'Usuario actualizado');
-      // opcional: actualizar `selectedUser` si está activo
       setSelectedUser(prev => prev && prev.id === id ? { ...prev, ...data } : prev);
+      Alert.alert('Éxito', 'Usuario actualizado');
+      setEditModalVisible(false);
     } catch (err) {
       alertApiError(err, 'No se pudo editar el usuario');
     }
@@ -69,6 +71,15 @@ export default function Users() {
   const closeModal = () => {
     setSelectedUser(null);
     setModalVisible(false);
+  };
+
+  const openEditModal = (user: User) => {
+    setSelectedUser(user);
+    setEditModalVisible(true);
+  };
+
+  const closeEdit = () => {
+    setEditModalVisible(false);
   };
 
   if (loading) {
@@ -86,12 +97,21 @@ export default function Users() {
       ) : (
         <UserList users={users} onShowDetail={openModal} />
       )}
-      <DetailModal visible={modalVisible} onClose={closeModal}>
+      <DetailModal visible={modalVisible} onClose={closeModal} extraFooterButton={{ title: 'Editar usuario', onPress: () => selectedUser && openEditModal(selectedUser), style: { backgroundColor: colors.secondary } }}>
         {selectedUser ? (
           <UserDetailContent
             user={selectedUser}
             onChangeRole={updateRole}
-            onUpdateUser={updateUser}
+            onEditRequest={openEditModal}
+          />
+        ) : null}
+      </DetailModal>
+      <DetailModal visible={editModalVisible} onClose={closeEdit} showClose={false}>
+        {selectedUser ? (
+          <EditUserForm
+            user={selectedUser}
+            onSave={(data) => updateUser(selectedUser.id, data)}
+            onCancel={closeEdit}
           />
         ) : null}
       </DetailModal>

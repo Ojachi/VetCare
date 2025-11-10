@@ -19,6 +19,13 @@ type Props = {
 };
 
 export default function UserCard({ user, onShowDetail }: Props) {
+  const roleEs: Record<string, string> = {
+    ADMIN: 'Administrador',
+    OWNER: 'Dueño de mascota',
+    VETERINARIAN: 'Veterinario',
+    EMPLOYEE: 'Empleado',
+  };
+  const roleLabel = roleEs[user.role] ?? user.role;
   return (
     <TouchableOpacity activeOpacity={0.85} onPress={() => onShowDetail(user)}>
       <Card>
@@ -29,7 +36,7 @@ export default function UserCard({ user, onShowDetail }: Props) {
         )}
         {!!user.phone && <Text style={typography.body}>{user.phone}</Text>}
         <Text style={[typography.caption, { marginTop: 6 }]}>
-          Rol: <Text style={{ fontWeight: '700', color: colors.primary }}>{user.role}</Text>
+          Rol: <Text style={{ fontWeight: '700', color: colors.primary }}>{roleLabel}</Text>
         </Text>
       </Card>
     </TouchableOpacity>
