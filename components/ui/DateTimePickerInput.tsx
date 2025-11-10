@@ -8,9 +8,10 @@ import Button from './Button';
 type Props = {
   date: Date;
   onChange: (date: Date) => void;
+  onlyDate?: boolean; // si true, oculta selección de hora
 };
 
-export default function DateTimePickerInput({ date, onChange }: Props) {
+export default function DateTimePickerInput({ date, onChange, onlyDate = false }: Props) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
@@ -50,27 +51,28 @@ export default function DateTimePickerInput({ date, onChange }: Props) {
           textStyle={{ fontSize: 14 }}
         />
       </View>
-
-      <View style={styles.row}>
-        <View style={{ flex: 1 }}>
-          <Text style={typography.caption}>Hora</Text>
-          <Text style={[typography.body, { color: colors.darkGray }]}>
-            {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </Text>
+      {!onlyDate && (
+        <View style={styles.row}>
+          <View style={{ flex: 1 }}>
+            <Text style={typography.caption}>Hora</Text>
+            <Text style={[typography.body, { color: colors.darkGray }]}>
+              {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+          </View>
+          <Button
+            title="Elegir hora"
+            onPress={() => setShowTimePicker(true)}
+            style={styles.smallBtnSecondary}
+            textStyle={{ fontSize: 14 }}
+          />
         </View>
-        <Button
-          title="Elegir hora"
-          onPress={() => setShowTimePicker(true)}
-          style={styles.smallBtnSecondary}
-          textStyle={{ fontSize: 14 }}
-        />
-      </View>
+      )}
 
       {showDatePicker && (
         <DateTimePicker value={date} mode="date" display="default" onChange={onChangeDate} />
       )}
 
-      {showTimePicker && (
+      {!onlyDate && showTimePicker && (
         <DateTimePicker value={date} mode="time" display="default" onChange={onChangeTime} />
       )}
     </View>
