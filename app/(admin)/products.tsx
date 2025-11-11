@@ -80,16 +80,13 @@ export default function ProductsAdmin() {
   return (
     <View style={styles.container}>
       <Text style={typography.h2}>Gestión de Productos</Text>
-      <Card style={{ padding: 14, marginVertical: 12 }}>
-        <TouchableOpacity style={styles.addButton} onPress={() => openForm(null)}>
-          <Text style={styles.addButtonText}>+ Nuevo Producto</Text>
-        </TouchableOpacity>
-        <Text style={[typography.caption, { color: colors.darkGray }]}>Toca un producto para ver detalle o editar.</Text>
-      </Card>
+      <TouchableOpacity style={[styles.addButton, { marginVertical: 12 }]} onPress={() => openForm(null)}>
+        <Text style={styles.addButtonText}>+ Nuevo Producto</Text>
+      </TouchableOpacity>
 
       <FlatList data={products} keyExtractor={(i) => String(i.id)} renderItem={renderItem} ListEmptyComponent={<Text>No hay productos.</Text>} refreshing={loading} onRefresh={loadProducts} />
 
-      <DetailModal visible={modalVisible} onClose={() => setModalVisible(false)}>
+      <DetailModal visible={modalVisible} onClose={() => setModalVisible(false)} showClose={modalMode !== 'form'}>
         {modalMode === 'form' ? (
           <ProductForm product={selected} onSaved={onSaved} onCancel={() => setModalVisible(false)} />
         ) : (

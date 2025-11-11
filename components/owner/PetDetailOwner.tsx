@@ -2,26 +2,35 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
-import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import { alertApiError } from '../../utils/apiError';
+import Button from '../ui/Button';
+import Card from '../ui/Card';
 
-export default function PetDetail() {
+export default function PetDetailOwner({
+  petId: propPetId,
+  onEdit,
+  onSchedule,
+  onViewDiagnostics,
+  onDeleted,
+}: {
+  petId?: string;
+  onEdit?: (petId: string) => void;
+  onSchedule?: (petId: string) => void;
+  onViewDiagnostics?: (petId: string) => void;
+  onDeleted?: () => void;
+}) {
   const router = useRouter();
-  const { petId } = useLocalSearchParams<{ petId: string }>();
+  const { petId: qPetId } = useLocalSearchParams<{ petId: string }>();
+  const petId = propPetId || qPetId;
   const [pet, setPet] = useState<any | null>(null);
 
   useEffect(() => {
     const load = async () => {
       if (!petId) return;
-      try {
-        const res = await axiosClient.get(`/api/pets/${petId}`);
-        setPet(res.data);
-      } catch (err) {
-        alertApiError(err, 'No se pudo cargar la mascota');
-      }
+      try { const res = await axiosClient.get(`/api/pets/${petId}`); setPet(res.data); }
+      catch (err) { alertApiError(err, 'No se pudo cargar la mascota'); }
     };
     load();
   }, [petId]);
@@ -39,20 +48,15 @@ export default function PetDetail() {
         {pet.sex && <Text style={typography.body}>Género: {pet.sex}</Text>}
 
         <View style={{ marginTop: 12 }}>
-          <Button title="Editar" onPress={() => router.push({ pathname: '/(owner)/edit-pet', params: { petId } } as any)} />
+          <Button title="Editar" onPress={() => petId && (onEdit ? onEdit(petId) : router.push({ pathname: '/(owner)/edit-pet', params: { petId } } as any))} />
           <View style={{ height: 8 }} />
-          <Button title="Agendar Cita" onPress={() => router.push({ pathname: '/(owner)/schedule-appointment', params: { petId } } as any)} />
+          <Button title="Agendar Cita" onPress={() => petId && (onSchedule ? onSchedule(petId) : router.push({ pathname: '/(owner)/schedule-appointment', params: { petId } } as any))} />
           <View style={{ height: 8 }} />
-          <Button title="Ver Diagnósticos" onPress={() => router.push({ pathname: '/(owner)/view-diagnostics', params: { petId } } as any)} />
+          <Button title="Ver Diagnósticos" onPress={() => petId && (onViewDiagnostics ? onViewDiagnostics(petId) : router.push({ pathname: '/(owner)/view-diagnostics', params: { petId } } as any))} />
           <View style={{ height: 8 }} />
           <Button title="Eliminar Mascota" onPress={async () => {
-            try {
-              await axiosClient.delete(`/api/pets/${petId}`);
-              Alert.alert('Éxito', 'Mascota eliminada');
-              router.replace('/(owner)/view-pets' as any);
-            } catch (err) {
-              alertApiError(err, 'No se pudo eliminar la mascota');
-            }
+            try { await axiosClient.delete(`/api/pets/${petId}`); Alert.alert('Éxito', 'Mascota eliminada'); router.replace('/(owner)/view-pets' as any); }
+            catch (err) { alertApiError(err, 'No se pudo eliminar la mascota'); }
           }} style={{ backgroundColor: colors.danger }} />
         </View>
       </Card>
@@ -63,5 +67,4 @@ export default function PetDetail() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
 });

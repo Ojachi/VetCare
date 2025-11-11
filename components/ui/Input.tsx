@@ -6,8 +6,18 @@ interface InputProps extends TextInputProps {
   style?: object;
 }
 
-export default function Input({ style, ...props }: InputProps) {
-  return <TextInput style={[styles.input, style]} {...props} />;
+export default function Input({ style, multiline, ...props }: InputProps) {
+  return (
+    <TextInput
+      style={[
+        styles.input,
+        multiline && styles.multilineInput,
+        style,
+      ]}
+      multiline={multiline}
+      {...props}
+    />
+  );
 }
 
 const styles = StyleSheet.create({
@@ -16,10 +26,18 @@ const styles = StyleSheet.create({
     height: 50,
     borderColor: colors.lightGray,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    marginVertical: 8,
-    fontSize: 16,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginVertical: 0,
+    fontSize: 15,
+    fontWeight: '500',
     backgroundColor: colors.white,
+    color: colors.darkGray,
+  },
+  multilineInput: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+    paddingVertical: 12,
   },
 });

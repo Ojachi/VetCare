@@ -2,7 +2,7 @@ import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
 import React, { useContext, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import OwnerHeader from '../../components/ui/AdminHeader';
+import OwnerHeader from '../../components/ui/OwnerHeader';
 import ScreenBackground from '../../components/ui/ScreenBackground';
 import { SessionContext } from '../../context/SessionContext';
 
@@ -32,17 +32,16 @@ export default function OwnerLayout() {
 		</ScreenBackground>
 	);
 
-		const visibleTabs = ['index', 'view-pets', 'schedule-appointment', 'view-appointments', 'view-diagnostics', 'profile', 'products'];
+	const visibleTabs = ['index', 'mascotas', 'citas', 'diagnosticos', 'perfil', 'productos'];
 
 		const iconFor = (name: string, color: string, size: number) => {
 			switch (name) {
 				case 'index': return <MaterialIcons name="home" color={color} size={size} />;
-				case 'view-pets': return <FontAwesome5 name="paw" color={color} size={size} />;
-				case 'schedule-appointment': return <MaterialIcons name="event" color={color} size={size} />;
-				case 'view-appointments': return <MaterialIcons name="event-available" color={color} size={size} />;
-				case 'view-diagnostics': return <FontAwesome5 name="file-medical-alt" color={color} size={size} />;
-				case 'profile': return <MaterialIcons name="person" color={color} size={size} />;
-				case 'products': return <FontAwesome5 name="shopping-bag" color={color} size={size} />;
+				case 'mascotas': return <FontAwesome5 name="paw" color={color} size={size} />;
+				case 'citas': return <MaterialIcons name="event-available" color={color} size={size} />;
+				case 'diagnosticos': return <FontAwesome5 name="file-medical-alt" color={color} size={size} />;
+				case 'perfil': return <MaterialIcons name="person" color={color} size={size} />;
+				case 'productos': return <FontAwesome5 name="shopping-bag" color={color} size={size} />;
 				default: return null;
 			}
 		};
@@ -63,12 +62,11 @@ export default function OwnerLayout() {
 					})}
 				>
 					<Tabs.Screen name="index" options={{ title: 'Inicio' }} />
-					<Tabs.Screen name="view-pets" options={{ title: 'Mis mascotas' }} />
-					<Tabs.Screen name="schedule-appointment" options={{ title: 'Agendar' }} />
-					<Tabs.Screen name="view-appointments" options={{ title: 'Citas' }} />
-					<Tabs.Screen name="view-diagnostics" options={{ title: 'Diagnósticos' }} />
-					<Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
-					<Tabs.Screen name="products" options={{ title: 'Productos' }} />
+					<Tabs.Screen name="mascotas" options={{ title: 'Mascotas' }} />
+					<Tabs.Screen name="citas" options={{ title: 'Citas' }} />
+					<Tabs.Screen name="diagnosticos" options={{ title: 'Diagnósticos' }} />
+					<Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
+					<Tabs.Screen name="productos" options={{ title: 'Productos' }} />
 				</Tabs>
 			</ScreenBackground>
 		);

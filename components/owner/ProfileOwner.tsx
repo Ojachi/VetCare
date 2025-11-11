@@ -1,31 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
-import Button from '../../components/ui/Button';
-import ChangePassword from '../../components/ui/ChangePassword';
-import Input from '../../components/ui/Input';
 import { useSession } from '../../context/SessionContext';
+import Button from '../ui/Button';
+import ChangePassword from '../ui/ChangePassword';
+import Input from '../ui/Input';
 
 const defaultAvatar = require('../../assets/images/icon.png');
 
-export default function Profile() {
+export default function ProfileOwner() {
   const { user, login } = useSession();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<any>({});
 
-  useEffect(() => {
-    if (user) setForm(user);
-  }, [user]);
+  useEffect(() => { if (user) setForm(user); }, [user]);
 
   const save = async () => {
-    try {
-      const res = await axiosClient.put('/api/users/me', form);
-      login(res.data);
-      Alert.alert('Éxito', 'Perfil actualizado');
-      setEditing(false);
-    } catch {
-      Alert.alert('Error', 'No se pudo actualizar el perfil');
-    }
+    try { const res = await axiosClient.put('/api/users/me', form); login(res.data); Alert.alert('Éxito', 'Perfil actualizado'); setEditing(false); }
+    catch { Alert.alert('Error', 'No se pudo actualizar el perfil'); }
   };
 
   if (!form) return <View style={styles.center}><Text>Cargando...</Text></View>;
@@ -35,7 +27,6 @@ export default function Profile() {
       <TouchableOpacity style={styles.avatarWrap} onPress={() => Alert.alert('Avatar', 'Implementar selector de avatar si se desea')}>
         <Image source={defaultAvatar} style={styles.avatar} />
       </TouchableOpacity>
-
       {editing ? (
         <>
           <Input placeholder="Nombre" value={form.name || ''} onChangeText={(v) => setForm({ ...form, name: v })} />
