@@ -3,11 +3,11 @@ import CookieManager from "@react-native-cookies/cookies";
 // no Constants needed here
 import { useRouter, useSegments } from "expo-router";
 import React, {
-    createContext,
-    ReactNode,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import { Alert } from "react-native";
 
@@ -76,7 +76,8 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const inVetGroup = segments[0] === "(veterinarian)";
     const inEmployeeGroup = segments[0] === "(employee)";
 
-    if (!user && !inAuthGroup) {
+    // Only redirect to login if trying to access protected routes without auth
+    if (!user && (inAdminGroup || inOwnerGroup || inVetGroup || inEmployeeGroup)) {
       router.replace("/(auth)/login");
       return;
     }

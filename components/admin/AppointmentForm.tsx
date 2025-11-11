@@ -1,8 +1,7 @@
 import { Picker } from '@react-native-picker/picker';
 import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient, { formatLocalDateTime } from '../../api/axiosClient';
-import Button from '../../components/ui/Button';
 import DateTimePickerInput from '../../components/ui/DateTimePickerInput';
 import Input from '../../components/ui/Input';
 import colors from '../../styles/colors';
@@ -88,8 +87,13 @@ export default function AppointmentForm({
 
   return (
     <View style={styles.formContainer}>
-      <Text style={typography.h3}>{appointment?.id ? 'Editar cita' : 'Nueva cita'}</Text>
-      <Text style={[typography.caption, { marginBottom: 8, color: colors.darkGray }]}>Completa los campos para gestionar la cita</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerEmoji}>📅</Text>
+        <View>
+          <Text style={typography.h2}>{appointment?.id ? 'Editar cita' : 'Nueva cita'}</Text>
+          <Text style={[typography.caption, { marginBottom: 8, color: colors.muted }]}>Completa los campos para gestionar la cita</Text>
+        </View>
+      </View>
 
       <Text style={styles.label}>Mascota</Text>
       <View style={styles.pickerBox}>
@@ -145,19 +149,23 @@ export default function AppointmentForm({
   <Input value={note} onChangeText={setNote} placeholder="Ej. Síntomas, solicitudes, etc." multiline textAlignVertical="top" style={{ minHeight: 90 }} />
 
       <View style={styles.actions}>
-        <Button
-          title={appointment?.id ? 'Guardar cambios' : 'Crear cita'}
+        <TouchableOpacity
+          style={[styles.saveButton, loading && styles.disabledButton]}
           onPress={handleSave}
           disabled={loading}
-          style={{ flex: 1, marginRight: 8 }}
-          textStyle={{ fontSize: 16 }}
-        />
-        <Button
-          title="Cancelar"
+          activeOpacity={0.8}
+        >
+          <Text style={styles.saveButtonText}>
+            {appointment?.id ? 'Guardar cambios' : 'Crear cita'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cancelButton}
           onPress={onCancel}
-          style={{ flex: 1, backgroundColor: colors.danger }}
-          textStyle={{ fontSize: 16 }}
-        />
+          activeOpacity={0.8}
+        >
+          <Text style={styles.cancelButtonText}>Cancelar</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -165,15 +173,56 @@ export default function AppointmentForm({
 
 const styles = StyleSheet.create({
   formContainer: { padding: 16, paddingBottom: 24 },
-  label: { ...typography.caption, marginTop: 10 },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, gap: 12 },
+  headerEmoji: { fontSize: 40, marginRight: 8 },
+  label: { ...typography.caption, marginTop: 12, color: colors.darkGray, fontWeight: '600' },
   pickerBox: {
     borderWidth: 1,
     borderColor: '#EEF2F3',
     borderRadius: 12,
     backgroundColor: colors.white,
-    marginTop: 6,
-    marginBottom: 8,
+    marginTop: 8,
+    marginBottom: 12,
     overflow: 'hidden',
   },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 16 },
+  saveButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  saveButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: colors.danger,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cancelButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
 });

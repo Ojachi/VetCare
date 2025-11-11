@@ -42,15 +42,34 @@ export default function AdminLayout() {
         screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: '#2E8B57',
-          tabBarInactiveTintColor: '#6B7280',
-          tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#EEF2F3', height: 60, paddingBottom: 6 },
-          tabBarLabelStyle: { fontWeight: '600' },
+          tabBarInactiveTintColor: '#9CA3AF',
+          tabBarStyle: { 
+            backgroundColor: '#fff', 
+            borderTopWidth: 1,
+            borderTopColor: '#E5E7EB',
+            height: 64, 
+            paddingBottom: 8,
+            paddingTop: 4,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 8,
+          },
+          tabBarLabelStyle: { 
+            fontWeight: '600',
+            fontSize: 10,
+            marginTop: 2,
+          },
+          tabBarIconStyle: {
+            marginBottom: 2,
+          },
         }}
       >
         <Tabs.Screen
           name="index"
           options={{
-            title: "Home",
+            title: "Inicio",
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="home" color={color} size={size} />
             ),
@@ -60,7 +79,7 @@ export default function AdminLayout() {
         <Tabs.Screen
           name="users"
           options={{
-            title: "Gestión de Usuarios",
+            title: "Usuarios",
             tabBarIcon: ({ color, size }) => (
               <FontAwesome5 name="users-cog" color={color} size={size} />
             ),
@@ -80,7 +99,7 @@ export default function AdminLayout() {
         <Tabs.Screen
           name="services"
           options={{
-            title: "Gestión de Servicios",
+            title: "Servicios",
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="list" color={color} size={size} />
             ),
@@ -100,7 +119,7 @@ export default function AdminLayout() {
         <Tabs.Screen
           name="medical-records"
           options={{
-            title: "Historial Médico",
+            title: "Historial",
             tabBarIcon: ({ color, size }) => (
               <FontAwesome5 name="file-medical-alt" color={color} size={size} />
             ),
@@ -113,6 +132,16 @@ export default function AdminLayout() {
             title: "Productos",
             tabBarIcon: ({ color, size }) => (
               <FontAwesome5 name="shopping-cart" color={color} size={size} />
+            ),
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
+          name="perfil"
+          options={{
+            title: "Perfil",
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name="person" color={color} size={size} />
             ),
             headerShown: false,
           }}

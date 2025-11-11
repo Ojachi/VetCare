@@ -143,14 +143,19 @@ export default function AdminAppointmentsScreen() {
 
         return (
             <TouchableOpacity activeOpacity={0.85} onPress={() => handleShowDetail(item)}>
-                <Card style={{ padding: 16 }}>
-                                        <View style={styles.cardHeaderRow}>
-                                            <Text style={[typography.h3, { flex: 1 }]} numberOfLines={1}>{petName}</Text>
-                                            <View style={[styles.badge, badgeColor(statusNorm)]}><Text style={styles.badgeText}>{statusLabelEs}</Text></View>
-                                        </View>
-                    <Text style={typography.subtitle}>{formatDisplayDateTime(date)}</Text>
-                    <Text style={[typography.caption, { marginTop: 4 }]}>Propietario: {ownerName}</Text>
-                    <Text style={[typography.caption, { marginTop: 2 }]}>Servicio: {serviceName}</Text>
+                <View style={[styles.appointmentCard, { borderLeftWidth: 4, borderLeftColor: badgeColor(statusNorm).backgroundColor }]}>
+                    <View style={styles.cardHeaderRow}>
+                        <Text style={[typography.h3, { flex: 1 }]} numberOfLines={1}>📅 {petName}</Text>
+                        <View style={[styles.badge, badgeColor(statusNorm)]}><Text style={styles.badgeText}>{statusLabelEs}</Text></View>
+                    </View>
+                    <View style={styles.divider} />
+                    <Text style={[typography.caption, { color: colors.muted }]}>📍 Fecha y hora</Text>
+                    <Text style={[typography.body, { marginTop: 4 }]}>{formatDisplayDateTime(date)}</Text>
+                    <View style={styles.divider} />
+                    <Text style={[typography.caption, { color: colors.muted }]}>👤 Propietario</Text>
+                    <Text style={[typography.body, { marginTop: 4 }]}>{ownerName}</Text>
+                    <Text style={[typography.caption, { color: colors.muted, marginTop: 8 }]}>🏥 Servicio</Text>
+                    <Text style={[typography.body, { marginTop: 4 }]}>{serviceName}</Text>
                     {!nonEditable.includes(statusNorm) ? (
                         <View style={styles.actionsRow}>
                             <Button
@@ -173,7 +178,7 @@ export default function AdminAppointmentsScreen() {
                             />
                         </View>
                     ) : null}
-                </Card>
+                </View>
             </TouchableOpacity>
         );
     };
@@ -187,10 +192,18 @@ export default function AdminAppointmentsScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={[typography.h2, { paddingHorizontal: 16, marginBottom: 8 }]}>Gestión de Citas</Text>
-            <View style={{ paddingHorizontal: 16, flexDirection: 'row', gap: 12 }}>
-                <Button title="+ Nueva Cita" onPress={handleCreate} style={{ flex: 1 }} />
-                <Button title={showFilters ? 'Ocultar filtros' : 'Filtros'} onPress={() => setShowFilters(f => !f)} style={{ flex: 1, backgroundColor: colors.secondary }} textStyle={{ fontSize: 16 }} />
+            <View style={styles.header}>
+                <Text style={styles.headerEmoji}>📅</Text>
+                <Text style={[typography.h2, styles.headerTitle]}>Gestión de Citas</Text>
+                <Text style={styles.headerSubtitle}>Administra todas las citas veterinarias</Text>
+            </View>
+            <View style={styles.topButtonsContainer}>
+                <TouchableOpacity style={[styles.addButton, { flex: 1 }]} onPress={handleCreate} activeOpacity={0.8}>
+                    <Text style={styles.addButtonText}>+ Nueva Cita</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.filterButton, { flex: 1 }]} onPress={() => setShowFilters(f => !f)} activeOpacity={0.8}>
+                    <Text style={styles.filterButtonText}>{showFilters ? 'Ocultar filtros' : 'Filtros'}</Text>
+                </TouchableOpacity>
             </View>
 
                         {loading && appointments.length === 0 ? (
@@ -221,7 +234,9 @@ export default function AdminAppointmentsScreen() {
                                                         {services.map(s => <Picker.Item key={s.id} label={s.name} value={s.id} />)}
                                                     </Picker>
                                                 </View>
-                                                <Button title="Limpiar" onPress={() => { setFilterStatus('ALL'); setFilterServiceId(null); }} style={{ backgroundColor: colors.secondary }} textStyle={{ fontSize: 14 }} />
+                                                <TouchableOpacity style={[styles.filterButton, { marginTop: 8 }]} onPress={() => { setFilterStatus('ALL'); setFilterServiceId(null); }} activeOpacity={0.8}>
+                                                    <Text style={styles.filterButtonText}>Limpiar</Text>
+                                                </TouchableOpacity>
                                             </Card>
                                         ) : null}
                                         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
@@ -251,13 +266,38 @@ export default function AdminAppointmentsScreen() {
 
 const styles = StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background, paddingTop: 12 },
+        header: {
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 16,
+            marginBottom: 12,
+        },
+        headerEmoji: {
+            fontSize: 40,
+            marginBottom: 8,
+        },
+        headerTitle: {
+            color: colors.darkGray,
+            marginBottom: 4,
+        },
+        headerSubtitle: {
+            fontSize: 13,
+            color: colors.muted,
+        },
         center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-        actionsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+        appointmentCard: { backgroundColor: colors.white, borderRadius: 12, padding: 12, marginBottom: 12 },
+        divider: { height: 1, backgroundColor: '#EEF2F3', marginVertical: 12 },
+        actionsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 6 },
         cardHeaderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
         badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 16 },
         badgeText: { color: '#fff', fontSize: 12, fontWeight: '600' },
         pickerBox: { borderWidth: 1, borderColor: '#EEF2F3', borderRadius: 12, backgroundColor: colors.white, marginTop: 6, marginBottom: 12, overflow: 'hidden' },
         filterLabel: { ...typography.caption, marginTop: 4 },
+        topButtonsContainer: { paddingHorizontal: 16, marginBottom: 16, flexDirection: 'row', gap: 8 },
+        addButton: { backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 16, borderRadius: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+        addButtonText: { color: colors.white, fontWeight: '700', fontSize: 15 },
+        filterButton: { backgroundColor: colors.secondary, paddingVertical: 12, paddingHorizontal: 16, borderRadius: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+        filterButtonText: { color: colors.white, fontWeight: '700', fontSize: 15 },
 });
 
 function badgeColor(status: string) {

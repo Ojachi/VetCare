@@ -1,4 +1,5 @@
-import { Stack, useRouter } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Tabs, useRouter } from 'expo-router';
 import React, { useContext, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import AdminHeader from '../../components/ui/AdminHeader';
@@ -33,7 +34,31 @@ export default function EmployeeLayout() {
 	return (
 		<ScreenBackground>
 			<AdminHeader title="Empleado" />
-			<Stack screenOptions={{ headerShown: false }} />
+			<Tabs
+				screenOptions={({ route }) => ({
+					headerShown: false,
+					tabBarActiveTintColor: '#2E8B57',
+					tabBarInactiveTintColor: '#6B7280',
+					tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#EEF2F3', height: 60, paddingBottom: 6 },
+					tabBarLabelStyle: { fontWeight: '600' },
+					tabBarIcon: ({ color, size }) => {
+						switch (route.name) {
+							case 'index': return <MaterialIcons name="home" color={color} size={size} />;
+							case 'employee-appointments': return <MaterialIcons name="event-available" color={color} size={size} />;
+							case 'register-pet': return <MaterialIcons name="add-circle" color={color} size={size} />;
+							case 'edit-pet': return <MaterialIcons name="edit" color={color} size={size} />;
+							case 'perfil': return <MaterialIcons name="person" color={color} size={size} />;
+							default: return null;
+						}
+					}
+				})}
+			>
+				<Tabs.Screen name="index" options={{ title: 'Inicio' }} />
+				<Tabs.Screen name="employee-appointments" options={{ title: 'Citas' }} />
+				<Tabs.Screen name="register-pet" options={{ title: 'Registrar' }} />
+				<Tabs.Screen name="edit-pet" options={{ title: 'Editar' }} />
+				<Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
+			</Tabs>
 		</ScreenBackground>
 	);
 }

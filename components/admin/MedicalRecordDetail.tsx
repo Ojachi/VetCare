@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import { formatDisplayDateTime } from '../../utils/date';
+import Card from '../ui/Card';
 
 export default function MedicalRecordDetail({ record }: { record: any }) {
   const appointment = record.appointment;
@@ -13,68 +14,200 @@ export default function MedicalRecordDetail({ record }: { record: any }) {
   const status = String(appointment?.status ?? '').toUpperCase();
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={typography.h3}>Historial Médico</Text>
-      {!!status && (
-        <View style={styles.badgeRow}>
-          <View style={[styles.badge, badgeColor(status)]}><Text style={styles.badgeText}>{mapStatusToSpanish(status)}</Text></View>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerIcon}>📋</Text>
+        <Text style={[typography.h2, styles.headerTitle]}>Historial Médico</Text>
+        {!!status && (
+          <View style={[styles.badge, badgeColor(status)]}>
+            <Text style={styles.badgeText}>{mapStatusToSpanish(status)}</Text>
+          </View>
+        )}
+      </View>
+
+      {/* Medical Info */}
+      <Card style={[styles.card, { borderLeftWidth: 4, borderLeftColor: colors.danger }]}>
+        <Text style={[typography.h3, styles.cardTitle]}>💊 Información Médica</Text>
+        <View style={styles.section}>
+          <Text style={styles.label}>Resumen</Text>
+          <Text style={styles.value}>{record.description ?? record.treatment ?? '—'}</Text>
         </View>
-      )}
-
-      <Text style={styles.sectionTitle}>Resumen</Text>
-      <Text style={styles.text}>{record.description ?? record.treatment ?? '—'}</Text>
-
-      <Text style={styles.sectionTitle}>Tratamiento</Text>
-      <Text style={styles.text}>{record.treatment ?? '—'}</Text>
-
-      <Text style={styles.sectionTitle}>Medicamentos</Text>
-      <Text style={styles.text}>{record.medications ?? '—'}</Text>
-
-      <Text style={styles.sectionTitle}>Cita</Text>
-      <Text style={styles.text}>Servicio: {service?.name ?? '—'}</Text>
-      <Text style={styles.text}>Fecha cita: {formatDisplayDateTime(appointment?.startDateTime ?? record.date ?? '')}</Text>
-      <Text style={styles.text}>Estado: {mapStatusToSpanish(status) || '—'}</Text>
-      <Text style={styles.text}>Nota: {appointment?.note ?? '—'}</Text>
-      <Text style={styles.text}>Agendada por: {appointment?.scheduleBy?.name ?? '—'}</Text>
-      <Text style={styles.text}>Asignado a: {appointment?.assignedTo?.name ?? vet?.name ?? '—'}</Text>
-      {service ? (
-        <View style={{ marginTop: 6 }}>
-          <Text style={styles.text}>Precio: {service.price != null ? `$${service.price}` : '—'}</Text>
-          <Text style={styles.text}>Duración: {service.durationMinutes != null ? `${service.durationMinutes} min` : '—'}</Text>
-          <Text style={styles.text}>Requiere veterinario: {service.requiresVeterinarian ? 'Sí' : 'No'}</Text>
+        <View style={styles.section}>
+          <Text style={styles.label}>Tratamiento</Text>
+          <Text style={styles.value}>{record.treatment ?? '—'}</Text>
         </View>
-      ) : null}
+        <View style={styles.section}>
+          <Text style={styles.label}>Medicamentos</Text>
+          <Text style={styles.value}>{record.medications ?? '—'}</Text>
+        </View>
+      </Card>
 
-      <Text style={styles.sectionTitle}>Paciente</Text>
-      <Text style={styles.text}>Nombre: {pet?.name ?? '—'}</Text>
-      <Text style={styles.text}>Especie: {pet?.species ?? '—'}</Text>
-      <Text style={styles.text}>Raza: {pet?.breed ?? '—'}</Text>
-      <Text style={styles.text}>Sexo: {pet?.sex ?? '—'}</Text>
-      <Text style={styles.text}>Edad: {pet?.age ?? '—'}</Text>
-      <Text style={styles.text}>Peso: {pet?.weight != null ? `${pet.weight} kg` : '—'}</Text>
+      {/* Appointment Info */}
+      <Card style={[styles.card, { borderLeftWidth: 4, borderLeftColor: colors.secondary }]}>
+        <Text style={[typography.h3, styles.cardTitle]}>📅 Información de la Cita</Text>
+        <View style={styles.section}>
+          <Text style={styles.label}>Servicio</Text>
+          <Text style={styles.value}>{service?.name ?? '—'}</Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Fecha y Hora</Text>
+          <Text style={styles.value}>{formatDisplayDateTime(appointment?.startDateTime ?? record.date ?? '')}</Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Nota</Text>
+          <Text style={styles.value}>{appointment?.note ?? '—'}</Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Agendada por</Text>
+          <Text style={styles.value}>{appointment?.scheduleBy?.name ?? '—'}</Text>
+        </View>
+        {service && (
+          <>
+            <View style={styles.section}>
+              <Text style={styles.label}>Precio del Servicio</Text>
+              <Text style={styles.value}>{service.price != null ? `$${service.price}` : '—'}</Text>
+            </View>
+            <View style={styles.section}>
+              <Text style={styles.label}>Duración</Text>
+              <Text style={styles.value}>{service.durationMinutes != null ? `${service.durationMinutes} minutos` : '—'}</Text>
+            </View>
+          </>
+        )}
+      </Card>
 
-      <Text style={styles.sectionTitle}>Propietario</Text>
-      <Text style={styles.text}>Nombre: {owner?.name ?? '—'}</Text>
-      <Text style={styles.text}>Teléfono: {owner?.phone ?? '—'}</Text>
-      <Text style={styles.text}>Email: {owner?.email ?? '—'}</Text>
-      <Text style={styles.text}>Dirección: {owner?.address ?? '—'}</Text>
+      {/* Pet Info */}
+      <Card style={[styles.card, { borderLeftWidth: 4, borderLeftColor: colors.primary }]}>
+        <Text style={[typography.h3, styles.cardTitle]}>🐾 Paciente (Mascota)</Text>
+        <View style={styles.twoColumnRow}>
+          <View style={styles.section}>
+            <Text style={styles.label}>Nombre</Text>
+            <Text style={styles.value}>{pet?.name ?? '—'}</Text>
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.label}>Especie</Text>
+            <Text style={styles.value}>{pet?.species ?? '—'}</Text>
+          </View>
+        </View>
+        <View style={styles.twoColumnRow}>
+          <View style={styles.section}>
+            <Text style={styles.label}>Raza</Text>
+            <Text style={styles.value}>{pet?.breed ?? '—'}</Text>
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.label}>Sexo</Text>
+            <Text style={styles.value}>{pet?.sex ?? '—'}</Text>
+          </View>
+        </View>
+        <View style={styles.twoColumnRow}>
+          <View style={styles.section}>
+            <Text style={styles.label}>Edad</Text>
+            <Text style={styles.value}>{pet?.age ?? '—'}</Text>
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.label}>Peso</Text>
+            <Text style={styles.value}>{pet?.weight != null ? `${pet.weight} kg` : '—'}</Text>
+          </View>
+        </View>
+      </Card>
 
-      <Text style={styles.sectionTitle}>Veterinario</Text>
-      <Text style={styles.text}>Nombre: {vet?.name ?? '—'}</Text>
-      <Text style={styles.text}>Email: {vet?.email ?? '—'}</Text>
-      <Text style={styles.text}>Teléfono: {vet?.phone ?? '—'}</Text>
+      {/* Owner Info */}
+      <Card style={[styles.card, { borderLeftWidth: 4, borderLeftColor: colors.success }]}>
+        <Text style={[typography.h3, styles.cardTitle]}>👨‍👩‍👧 Propietario</Text>
+        <View style={styles.section}>
+          <Text style={styles.label}>Nombre</Text>
+          <Text style={styles.value}>{owner?.name ?? '—'}</Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Teléfono</Text>
+          <Text style={styles.value}>{owner?.phone ?? '—'}</Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Email</Text>
+          <Text style={styles.value}>{owner?.email ?? '—'}</Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Dirección</Text>
+          <Text style={styles.value}>{owner?.address ?? '—'}</Text>
+        </View>
+      </Card>
 
+      {/* Veterinarian Info */}
+      <Card style={[styles.card, { borderLeftWidth: 4, borderLeftColor: colors.warning }]}>
+        <Text style={[typography.h3, styles.cardTitle]}>🏥 Veterinario Asignado</Text>
+        <View style={styles.section}>
+          <Text style={styles.label}>Nombre</Text>
+          <Text style={styles.value}>{vet?.name ?? '—'}</Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Email</Text>
+          <Text style={styles.value}>{vet?.email ?? '—'}</Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.label}>Teléfono</Text>
+          <Text style={styles.value}>{vet?.phone ?? '—'}</Text>
+        </View>
+      </Card>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: colors.white },
-  sectionTitle: { ...typography.subtitle, marginTop: 12 } as any,
-  text: { ...typography.body, marginTop: 4 } as any,
-  badgeRow: { flexDirection: 'row', marginTop: 8 },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 16, alignSelf: 'flex-start', marginBottom: 6 },
-  badgeText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f8f9fa',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  headerIcon: {
+    fontSize: 40,
+    marginBottom: 8,
+  },
+  headerTitle: {
+    color: colors.darkGray,
+    marginBottom: 8,
+  },
+  badge: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    alignSelf: 'center',
+  },
+  badgeText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  card: {
+    marginBottom: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+  },
+  cardTitle: {
+    color: colors.darkGray,
+    marginBottom: 12,
+  },
+  section: {
+    marginBottom: 12,
+  },
+  twoColumnRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  label: {
+    fontSize: 12,
+    color: colors.muted,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  value: {
+    fontSize: 14,
+    color: colors.darkGray,
+    fontWeight: '500',
+  },
 });
 
 function mapStatusToSpanish(status: string): string {

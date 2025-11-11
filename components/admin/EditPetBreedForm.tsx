@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
-import Button from '../ui/Button';
+import Card from '../ui/Card';
 import Input from '../ui/Input';
 
 interface EditPetBreedFormProps {
@@ -18,13 +18,12 @@ export default function EditPetBreedForm({ petId, currentBreed, onCancel, onSave
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
-    if (!breed.trim()) return; // ignore empty
+    if (!breed.trim()) return;
     setSaving(true);
     try {
       await axiosClient.put(`/api/pets/${petId}`, { breed });
       onSaved(breed);
     } catch (e) {
-      // swallow error; upstream alert logic can be added later if desired
       console.error('Failed to update breed', e);
     } finally {
       setSaving(false);
@@ -32,18 +31,86 @@ export default function EditPetBreedForm({ petId, currentBreed, onCancel, onSave
   };
 
   return (
-    <View>
-      <Text style={[typography.h3, { textAlign: 'center' }]}>Editar raza</Text>
-      <Text style={[typography.caption, { textAlign: 'center', color: colors.darkGray, marginBottom: 12 }]}>Actualiza la raza de la mascota</Text>
-      <Input value={breed} onChangeText={setBreed} placeholder="Raza" autoFocus />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerEmoji}>🐾</Text>
+        <View>
+          <Text style={typography.h2}>Editar raza</Text>
+          <Text style={[typography.caption, { color: colors.muted }]}>Actualiza la raza de la mascota</Text>
+        </View>
+      </View>
+
+      <Card style={styles.formCard}>
+        <Text style={[typography.caption, { color: colors.muted, marginBottom: 8 }]}>Raza</Text>
+        <Input value={breed} onChangeText={setBreed} placeholder="Raza" autoFocus />
+      </Card>
+
       <View style={styles.row}>
-        <Button title={saving ? 'Guardando...' : 'Guardar'} onPress={save} disabled={saving} style={{ flex: 1, marginRight: 8 }} />
-        <Button title="Cancelar" onPress={onCancel} style={{ flex: 1, backgroundColor: colors.secondary }} />
+        <TouchableOpacity
+          style={[styles.saveButton, saving && styles.disabledButton]}
+          onPress={save}
+          disabled={saving}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.saveButtonText}>
+            {saving ? 'Guardando...' : 'Guardar'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={onCancel}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.cancelButtonText}>Cancelar</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
+  container: { padding: 16 },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, gap: 12 },
+  headerEmoji: { fontSize: 40 },
+  formCard: { padding: 12, marginBottom: 16 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  saveButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  saveButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: colors.secondary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cancelButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
 });

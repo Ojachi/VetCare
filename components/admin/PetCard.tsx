@@ -1,33 +1,109 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import colors from '../../styles/colors';
+import typography from '../../styles/typography';
+import Card from '../ui/Card';
 
-export default function PetCard({ pet, onOpenDetail }) {
+type Pet = {
+  id: number;
+  name: string;
+  species: string;
+  breed: string;
+  owner?: { id?: number; name: string; email?: string; role?: string; address?: string; phone?: string };
+  active?: boolean;
+};
+
+type Props = {
+  pet: Pet;
+  onOpenDetail: (pet: Pet) => void;
+};
+
+export default function PetCard({ pet, onOpenDetail }: Props) {
+  const speciesIcon = (species: string): string => {
+    const icons: Record<string, string> = {
+      PERRO: '🐕',
+      GATO: '🐈',
+      PAJARO: '🐦',
+      CONEJO: '🐰',
+      HAMSTER: '🐹',
+    };
+    return icons[species?.toUpperCase()] || '🐾';
+  };
+
   return (
-    <TouchableOpacity onPress={() => onOpenDetail(pet)}>
-      <View style={styles.petCard}>
-        <Text style={styles.name}>Nombre: {pet.name}</Text>
-        <Text style={styles.items}>Dueño: {pet.owner.name}</Text>
-        <Text style={styles.items}>Especie: {pet.species}</Text>
-        <Text style={[styles.items, { marginBottom: 0 }]}>Raza: {pet.breed}</Text>
-      </View>
+    <TouchableOpacity activeOpacity={0.85} onPress={() => onOpenDetail(pet)}>
+      <Card style={[styles.card, { borderTopWidth: 4, borderTopColor: colors.primary }]}>
+        <View style={styles.header}>
+          <Text style={styles.speciesIcon}>{speciesIcon(pet.species)}</Text>
+          <View style={styles.headerContent}>
+            <Text style={[typography.h3, styles.name]}>{pet.name}</Text>
+            <Text style={styles.species}>{pet.species}</Text>
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.content}>
+          {pet.owner && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoIcon}>👨‍👩‍👧</Text>
+              <Text style={styles.infoText}>{pet.owner.name}</Text>
+            </View>
+          )}
+          <View style={styles.infoRow}>
+            <Text style={styles.infoIcon}>🏷️</Text>
+            <Text style={styles.infoText}>{pet.breed}</Text>
+          </View>
+        </View>
+      </Card>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  petCard: {
-    marginBottom: 15,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#eee',
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 1,
+  card: {
+    marginBottom: 12,
   },
-  items: { marginBottom: 6 },
-  name: { fontWeight: 'bold', fontSize: 16 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  speciesIcon: {
+    fontSize: 32,
+    marginRight: 12,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  name: {
+    color: colors.darkGray,
+    marginBottom: 4,
+  },
+  species: {
+    fontSize: 13,
+    color: colors.muted,
+    fontWeight: '500',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.lightGray,
+    marginBottom: 12,
+  },
+  content: {
+    gap: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoIcon: {
+    fontSize: 14,
+    marginRight: 8,
+    width: 18,
+  },
+  infoText: {
+    fontSize: 13,
+    color: colors.muted,
+  },
 });

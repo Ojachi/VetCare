@@ -35,26 +35,29 @@ export default function VetLayout() {
 			<ScreenBackground>
 				<VetHeader title="Veterinario" />
 				<Tabs
-				screenOptions={({ route }) => ({
-					headerShown: false,
-					tabBarActiveTintColor: '#2E8B57',
-					tabBarInactiveTintColor: '#6B7280',
-					tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#EEF2F3', height: 60, paddingBottom: 6 },
-					tabBarLabelStyle: { fontWeight: '600' },
-					tabBarIcon: ({ color, size }) => {
-						switch (route.name) {
-							case 'index': return <MaterialIcons name="home" color={color} size={size} />;
-							case 'vet-appointments': return <MaterialIcons name="event-available" color={color} size={size} />;
-							case 'patient-history': return <FontAwesome5 name="file-medical-alt" color={color} size={size} />;
-							default: return null;
+					screenOptions={({ route }) => ({
+						headerShown: false,
+						tabBarActiveTintColor: '#2E8B57',
+						tabBarInactiveTintColor: '#6B7280',
+						tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#EEF2F3', height: 60, paddingBottom: 6 },
+						tabBarLabelStyle: { fontWeight: '600' },
+						tabBarIcon: ({ color, size }) => {
+							switch (route.name) {
+								case 'index': return <MaterialIcons name="home" color={color} size={size} />;
+								case 'vet-appointments': return <MaterialIcons name="event-available" color={color} size={size} />;
+								case 'patient-history': return <FontAwesome5 name="file-medical-alt" color={color} size={size} />;
+								case 'register-diagnosis': return <MaterialIcons name="assignment" color={color} size={size} />;
+								case 'perfil': return <MaterialIcons name="person" color={color} size={size} />;
+								default: return null;
+							}
 						}
-					}
-				})}
-			>
-				<Tabs.Screen name="index" options={{ title: 'Inicio' }} />
-				<Tabs.Screen name="vet-appointments" options={{ title: 'Citas' }} />
-				<Tabs.Screen name="patient-history" options={{ title: 'Pacientes' }} />
-				<Tabs.Screen name="register-diagnosis" options={{ title: 'Registrar Dx' }} />
+					})}
+				>
+					<Tabs.Screen name="index" options={{ title: 'Inicio' }} />
+					<Tabs.Screen name="vet-appointments" options={{ title: 'Citas' }} />
+					<Tabs.Screen name="patient-history" options={{ title: 'Pacientes' }} />
+					<Tabs.Screen name="register-diagnosis" options={{ title: 'Registrar Dx' }} />
+					<Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
 				</Tabs>
 			</ScreenBackground>
 	);

@@ -1,10 +1,9 @@
 import { Picker } from '@react-native-picker/picker';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import MedicalRecordDetail from '../../components/admin/MedicalRecordDetail';
 import MedicalRecordList from '../../components/admin/MedicalRecordList';
-import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import DateTimePickerInput from '../../components/ui/DateTimePickerInput';
 import DetailModal from '../../components/ui/DetailModal';
@@ -128,10 +127,18 @@ export default function MedicalRecordsAdmin() {
 
   return (
     <View style={styles.container}>
-      <Text style={[typography.h2, { paddingHorizontal: 16, marginTop: 12 }]}>Historial Médico</Text>
-      <View style={{ paddingHorizontal: 16, flexDirection: 'row', gap: 12, marginTop: 8 }}>
-        <Button title={showFilters ? 'Ocultar filtros' : 'Filtros'} onPress={() => setShowFilters(f => !f)} style={{ flex: 1, backgroundColor: colors.secondary }} />
-        <Button title="Recargar" onPress={loadRecords} style={{ flex: 1 }} />
+      <View style={styles.header}>
+        <Text style={styles.headerEmoji}>📋</Text>
+        <Text style={[typography.h2, styles.headerTitle]}>Historial Médico</Text>
+        <Text style={styles.headerSubtitle}>Registros y diagnósticos de mascotas</Text>
+      </View>
+      <View style={styles.topButtonsContainer}>
+        <TouchableOpacity style={[styles.filterButton, { flex: 1 }]} onPress={() => setShowFilters(f => !f)} activeOpacity={0.8}>
+          <Text style={styles.filterButtonText}>{showFilters ? 'Ocultar filtros' : 'Filtros'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.addButton, { flex: 1 }]} onPress={loadRecords} activeOpacity={0.8}>
+          <Text style={styles.addButtonText}>Recargar</Text>
+        </TouchableOpacity>
       </View>
 
       {showFilters ? (
@@ -177,8 +184,12 @@ export default function MedicalRecordsAdmin() {
           />
 
           <View style={{ flexDirection: 'row', gap: 12 }}>
-            <Button title="Aplicar" onPress={handleApplyFilters} style={{ flex: 1 }} />
-            <Button title="Limpiar" onPress={handleClearFilters} style={{ flex: 1, backgroundColor: colors.secondary }} />
+            <TouchableOpacity style={[styles.addButton, { flex: 1 }]} onPress={handleApplyFilters} activeOpacity={0.8}>
+              <Text style={styles.addButtonText}>Aplicar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.filterButton, { flex: 1 }]} onPress={handleClearFilters} activeOpacity={0.8}>
+              <Text style={styles.filterButtonText}>Limpiar</Text>
+            </TouchableOpacity>
           </View>
         </Card>
       ) : null}
@@ -199,8 +210,31 @@ export default function MedicalRecordsAdmin() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background, paddingTop: 12 },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    marginBottom: 12,
+  },
+  headerEmoji: {
+    fontSize: 40,
+    marginBottom: 8,
+  },
+  headerTitle: {
+    color: colors.darkGray,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: colors.muted,
+  },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   pickerBox: { borderWidth: 1, borderColor: '#EEF2F3', borderRadius: 12, backgroundColor: colors.white, marginTop: 6, marginBottom: 12, overflow: 'hidden' },
   filterLabel: { ...typography.caption, marginTop: 4 },
+  topButtonsContainer: { paddingHorizontal: 16, marginBottom: 16, flexDirection: 'row', gap: 8 },
+  addButton: { backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 16, borderRadius: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+  addButtonText: { color: colors.white, fontWeight: '700', fontSize: 15 },
+  filterButton: { backgroundColor: colors.secondary, paddingVertical: 12, paddingHorizontal: 16, borderRadius: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+  filterButtonText: { color: colors.white, fontWeight: '700', fontSize: 15 },
 });

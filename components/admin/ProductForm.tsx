@@ -1,8 +1,8 @@
 import * as FileSystem from 'expo-file-system';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
-import ButtonUI from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
 import { useImagePicker } from '../../hooks/useImagePicker';
 import colors from '../../styles/colors';
@@ -14,7 +14,7 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
   const [name, setName] = useState(product?.name ?? '');
   const [description, setDescription] = useState(product?.description ?? '');
   const [price, setPrice] = useState(product?.price ? String(product.price) : '');
-  const [image, setImage] = useState<string>(product?.image ?? ''); // raw base64 or data uri
+  const [image, setImage] = useState<string>(product?.image ?? '');
   const [previewUri, setPreviewUri] = useState<string | undefined>(undefined);
   const [descHeight, setDescHeight] = useState(100);
 
@@ -23,7 +23,6 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
     setDescription(product?.description ?? '');
     setPrice(product?.price ? String(product.price) : '');
     setImage(product?.image ?? '');
-    // set preview from provided product image
     if (product?.image) {
       if (product.image.startsWith('data:') || product.image.startsWith('http')) setPreviewUri(product.image);
       else setPreviewUri(`data:image/jpeg;base64,${product.image}`);
@@ -82,44 +81,71 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
   };
 
   return (
-    <View style={{}}
-    >
-      <Text style={[typography.h3, { textAlign: 'center' }]}>{product?.id ? 'Editar Producto' : 'Crear Producto'}</Text>
-      <Text style={[typography.caption, { textAlign: 'center', color: colors.darkGray, marginBottom: 12 }]}>Completa los datos del producto</Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerEmoji}>🛍️</Text>
+        <View>
+          <Text style={typography.h2}>{product?.id ? 'Editar producto' : 'Nuevo producto'}</Text>
+          <Text style={[typography.caption, { color: colors.muted }]}>Completa los datos del producto</Text>
+        </View>
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.form}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <Input placeholder="Nombre" value={name} onChangeText={setName} />
-        <Input
-          placeholder="Descripción"
-          value={description}
-          onChangeText={setDescription}
-          multiline
-          textAlignVertical="top"
-          onContentSizeChange={(e) => setDescHeight(e.nativeEvent.contentSize.height)}
-          style={[styles.textarea, { height: Math.max(100, descHeight) }]}
-        />
-        <Input placeholder="Precio" value={price} onChangeText={setPrice} keyboardType="numeric" />
-        {previewUri ? (
-          <Image source={{ uri: previewUri }} style={styles.preview} />
-        ) : null}
-  <ButtonUI title="Seleccionar imagen" onPress={handlePickImage} />
+        <Card style={styles.formCard}>
+          <Text style={[typography.caption, { color: colors.muted, marginBottom: 8 }]}>📝 Nombre</Text>
+          <Input placeholder="Nombre del producto" value={name} onChangeText={setName} style={{ marginBottom: 12 }} />
+          
+          <Text style={[typography.caption, { color: colors.muted, marginBottom: 8 }]}>📄 Descripción</Text>
+          <Input
+            placeholder="Descripción del producto"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            textAlignVertical="top"
+            onContentSizeChange={(e) => setDescHeight(e.nativeEvent.contentSize.height)}
+            style={[styles.textarea, { height: Math.max(100, descHeight), marginBottom: 12 }]}
+          />
+          
+          <Text style={[typography.caption, { color: colors.muted, marginBottom: 8 }]}>💰 Precio</Text>
+          <Input placeholder="0.00" value={price} onChangeText={setPrice} keyboardType="numeric" style={{ marginBottom: 12 }} />
+          
+          {previewUri ? (
+            <View style={styles.previewContainer}>
+              <Image source={{ uri: previewUri }} style={styles.preview} />
+            </View>
+          ) : null}
+
+          <TouchableOpacity 
+            style={styles.pickImageButton}
+            onPress={handlePickImage}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.pickImageButtonText}>📷 Seleccionar imagen</Text>
+          </TouchableOpacity>
+        </Card>
 
         <View style={styles.actionsRow}>
-          <ButtonUI
-            title={loading ? 'Guardando...' : (product?.id ? 'Guardar' : 'Registrar')}
+          <TouchableOpacity
+            style={[styles.saveButton, loading && styles.disabledButton]}
             onPress={onSubmit}
             disabled={loading}
-            style={{ flex: 1, marginRight: 8, backgroundColor: colors.secondary }}
-            textStyle={{ fontSize: 16 }}
-          />
-          <ButtonUI
-            title="Cancelar"
+            activeOpacity={0.8}
+          >
+            <Text style={styles.saveButtonText}>
+              {loading ? 'Guardando...' : (product?.id ? 'Guardar' : 'Registrar')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.cancelButton}
             onPress={onCancel}
-            style={{ flex: 1, backgroundColor: colors.danger }}
-            textStyle={{ fontSize: 16 }}
-          />
+            activeOpacity={0.8}
+          >
+            <Text style={styles.cancelButtonText}>Cancelar</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -127,8 +153,70 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
 }
 
 const styles = StyleSheet.create({
-  form: { paddingBottom: 8, gap: 8 },
-  actionsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
-  preview: { width: '100%', height: 160, borderRadius: 10, backgroundColor: '#eee' },
-  textarea: { minHeight: 100 },
+  container: { padding: 16, paddingBottom: 24 },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, gap: 12 },
+  headerEmoji: { fontSize: 40 },
+  form: { paddingBottom: 16, gap: 0 },
+  formCard: { padding: 12, marginBottom: 16 },
+  previewContainer: { marginBottom: 12, borderRadius: 12, overflow: 'hidden' },
+  preview: { width: '100%', height: 180, borderRadius: 12, backgroundColor: '#eee' },
+  textarea: { minHeight: 100, textAlignVertical: 'top' },
+  pickImageButton: {
+    backgroundColor: colors.secondary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  pickImageButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  actionsRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  saveButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  saveButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: colors.danger,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cancelButtonText: {
+    color: colors.white,
+    fontWeight: '700',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
 });

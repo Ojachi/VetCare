@@ -3,7 +3,6 @@ import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from
 import axiosClient from '../../api/axiosClient';
 import ProductDetail from '../../components/admin/ProductDetail';
 import ProductForm from '../../components/admin/ProductForm';
-import Card from '../../components/ui/Card';
 import DetailModal from '../../components/ui/DetailModal';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
@@ -53,7 +52,7 @@ export default function ProductsAdmin() {
 
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity onPress={() => openDetail(item)} activeOpacity={0.85}>
-      <Card style={styles.productCard}>
+      <View style={[styles.productCard, { borderLeftWidth: 4, borderLeftColor: colors.primary }]}>
         <View style={styles.row}>
           {item.image ? (
             <Image source={{ uri: ensureDataUri(item.image) }} style={styles.thumb} />
@@ -61,8 +60,8 @@ export default function ProductsAdmin() {
             <View style={[styles.thumb, styles.thumbPlaceholder]} />
           )}
           <View style={{ flex: 1 }}>
-            <Text style={typography.h3} numberOfLines={1}>{item.name}</Text>
-            <Text style={[typography.caption, { marginTop: 4 }]}>${item.price} COP</Text>
+            <Text style={[typography.h3, { marginBottom: 4 }]}>🛍️ {item.name}</Text>
+            <Text style={[typography.caption, { color: colors.muted, marginBottom: 8 }]}>${item.price} COP</Text>
             <View style={styles.actionsRow}>
               <TouchableOpacity onPress={() => openForm(item)} style={[styles.smallBtn, { backgroundColor: colors.secondary }]}>
                 <Text style={styles.smallBtnText}>Editar</Text>
@@ -73,13 +72,17 @@ export default function ProductsAdmin() {
             </View>
           </View>
         </View>
-      </Card>
+      </View>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={typography.h2}>Gestión de Productos</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerEmoji}>🛍️</Text>
+        <Text style={[typography.h2, styles.headerTitle]}>Gestión de Productos</Text>
+        <Text style={styles.headerSubtitle}>Administra todos los productos disponibles</Text>
+      </View>
       <TouchableOpacity style={[styles.addButton, { marginVertical: 12 }]} onPress={() => openForm(null)}>
         <Text style={styles.addButtonText}>+ Nuevo Producto</Text>
       </TouchableOpacity>
@@ -98,7 +101,23 @@ export default function ProductsAdmin() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: colors.background },
+  container: { flex: 1, padding: 16, backgroundColor: colors.background, paddingTop: 12 },
+  header: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  headerEmoji: {
+    fontSize: 40,
+    marginBottom: 8,
+  },
+  headerTitle: {
+    color: colors.darkGray,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: colors.muted,
+  },
   addButton: { backgroundColor: colors.primary, padding: 12, borderRadius: 10, alignItems: 'center', marginBottom: 8 },
   addButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
   productCard: { padding: 12 },

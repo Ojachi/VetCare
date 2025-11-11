@@ -1,7 +1,7 @@
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import { SessionContext } from '../../context/SessionContext';
 import colors from '../../styles/colors';
@@ -41,11 +41,11 @@ export default function RegisterDiagnosis() {
 
   const submit = async () => {
     if (!petId) {
-      Alert.alert('Seleccione una mascota');
+      Alert.alert('Error', 'Selecciona una mascota');
       return;
     }
     if (!description.trim()) {
-      Alert.alert('Ingrese la descripcion');
+      Alert.alert('Error', 'Ingresa la descripción del diagnóstico');
       return;
     }
     setLoading(true);
@@ -60,7 +60,7 @@ export default function RegisterDiagnosis() {
       if (treatment.trim()) payload.treatment = treatment.trim();
       if (medications.trim()) payload.medications = medications.trim();
       await axiosClient.post('/api/diagnoses', payload);
-      Alert.alert('Registrado', 'Diagnóstico registrado correctamente');
+      Alert.alert('Éxito', 'Diagnóstico registrado correctamente');
       setDescription('');
       setTreatment('');
       setMedications('');
@@ -82,37 +82,166 @@ export default function RegisterDiagnosis() {
   };
 
   return (
-    <View style={styles.container}>
-      <Card>
-        <Text style={typography.h3}>Registrar diagnóstico</Text>
-
-        <Text style={styles.label}>Mascota</Text>
-        <View style={styles.pickerWrap}>
-          <Picker selectedValue={petId} onValueChange={(v: string) => setPetId(v)}>
-            <Picker.Item label="-- Seleccione --" value={''} />
-            {pets.map((p) => (
-              <Picker.Item key={p.id} label={`${p.name} (${p.owner?.name || 'Propietario'})`} value={String(p.id)} />
-            ))}
-          </Picker>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <Text style={styles.headerEmoji}>📋</Text>
+          <Text style={[typography.h2, styles.headerTitle]}>Registrar Diagnóstico</Text>
+          <Text style={styles.headerSubtitle}>Documenta el diagnóstico del paciente</Text>
         </View>
 
-        <Text style={styles.label}>Descripción</Text>
-        <Input value={description} onChangeText={setDescription} multiline numberOfLines={4} placeholder="Detalles del diagnóstico" />
+        {/* Form Card */}
+        <Card style={styles.formCard}>
+          {/* Pet Picker */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>🐾 Mascota</Text>
+            <View style={styles.pickerWrap}>
+              <Picker selectedValue={petId} onValueChange={(v: string) => setPetId(v)}>
+                <Picker.Item label="-- Selecciona mascota --" value={''} />
+                {pets.map((p) => (
+                  <Picker.Item 
+                    key={p.id} 
+                    label={`${p.name} (${p.owner?.name || 'Propietario'})`} 
+                    value={String(p.id)} 
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
 
-        <Text style={styles.label}>Tratamiento (opcional)</Text>
-        <Input value={treatment} onChangeText={setTreatment} multiline numberOfLines={3} placeholder="Indicaciones de tratamiento" />
+          {/* Description */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>📝 Descripción del Diagnóstico</Text>
+            <Input 
+              value={description} 
+              onChangeText={setDescription} 
+              multiline 
+              numberOfLines={4} 
+              placeholder="Detalles del diagnóstico y hallazgos clínicos"
+              style={styles.input}
+            />
+          </View>
 
-        <Text style={styles.label}>Medicamentos (opcional)</Text>
-        <Input value={medications} onChangeText={setMedications} multiline numberOfLines={2} placeholder="Lista de medicamentos" />
+          {/* Treatment */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>💊 Tratamiento Recomendado (Opcional)</Text>
+            <Input 
+              value={treatment} 
+              onChangeText={setTreatment} 
+              multiline 
+              numberOfLines={3} 
+              placeholder="Indicaciones de tratamiento y cuidados"
+              style={styles.input}
+            />
+          </View>
 
-        <Button title={loading ? 'Guardando...' : 'Registrar Diagnóstico'} onPress={submit} disabled={loading} style={{ marginTop: 8 }} />
-      </Card>
-    </View>
+          {/* Medications */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>🧬 Medicamentos (Opcional)</Text>
+            <Input 
+              value={medications} 
+              onChangeText={setMedications} 
+              multiline 
+              numberOfLines={2} 
+              placeholder="Lista de medicamentos prescritos"
+              style={styles.input}
+            />
+          </View>
+
+          {/* Buttons */}
+          <View style={styles.buttonGroup}>
+            <Button 
+              title={loading ? 'Guardando...' : '✓ Registrar Diagnóstico'} 
+              onPress={submit} 
+              disabled={loading}
+              style={styles.submitButton}
+            />
+            <Button 
+              title="✕ Cancelar" 
+              onPress={() => router.back()}
+              disabled={loading}
+              style={styles.cancelButton}
+            />
+          </View>
+        </Card>
+
+        <View style={{ height: 20 }} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: 16 },
-  label: { ...typography.subtitle, marginTop: 12 } as any,
-  pickerWrap: { borderWidth: 1, borderColor: '#ddd', borderRadius: 12, marginTop: 8, overflow: 'hidden' },
+  container: { 
+    flex: 1, 
+    backgroundColor: colors.background 
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 20,
+  },
+
+  // Header Section
+  headerSection: {
+    alignItems: 'center',
+    marginBottom: 28,
+    paddingBottom: 16,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.lightGray,
+  },
+  headerEmoji: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
+  headerTitle: {
+    color: colors.darkGray,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: colors.muted,
+    textAlign: 'center',
+  },
+
+  // Form Card
+  formCard: {
+    paddingVertical: 20,
+  },
+
+  // Fields
+  fieldGroup: {
+    marginBottom: 18,
+  },
+  fieldLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.darkGray,
+    marginBottom: 8,
+  },
+  input: {
+    marginBottom: 0,
+  },
+
+  // Picker
+  pickerWrap: { 
+    borderWidth: 1, 
+    borderColor: colors.lightGray, 
+    borderRadius: 10, 
+    overflow: 'hidden',
+    backgroundColor: colors.white,
+  },
+
+  // Buttons
+  buttonGroup: {
+    marginTop: 24,
+    gap: 10,
+  },
+  submitButton: {
+    backgroundColor: colors.primary,
+  },
+  cancelButton: {
+    backgroundColor: colors.secondary,
+  },
 });

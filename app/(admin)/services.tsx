@@ -3,8 +3,6 @@ import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity,
 import axiosClient from '../../api/axiosClient';
 import ServiceDetail from '../../components/admin/ServiceDetail';
 import ServiceForm from '../../components/admin/ServiceForm';
-import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
 import DetailModal from '../../components/ui/DetailModal';
 import EmptyState from '../../components/ui/EmptyState';
 import colors from '../../styles/colors';
@@ -68,9 +66,19 @@ export default function ServicesAdmin() {
 
   return (
     <View style={styles.container}>
-      <Text style={[typography.h2, { paddingHorizontal: 16, marginBottom: 8 }]}>Gestión de Servicios</Text>
-      <View style={{ paddingHorizontal: 16 }}>
-        <Button title="+ Nuevo Servicio" onPress={() => openForm(null)} />
+      <View style={styles.header}>
+        <Text style={styles.headerEmoji}>🏥</Text>
+        <Text style={[typography.h2, styles.headerTitle]}>Gestión de Servicios</Text>
+        <Text style={styles.headerSubtitle}>Crea y administra servicios veterinarios</Text>
+      </View>
+      <View style={styles.topButtonsContainer}>
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => openForm(null)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.addButtonText}>+ Nuevo Servicio</Text>
+        </TouchableOpacity>
       </View>
 
       {services.length === 0 ? (
@@ -82,32 +90,38 @@ export default function ServicesAdmin() {
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <TouchableOpacity activeOpacity={0.85} onPress={() => openDetail(item)}>
-              <Card>
-                <View style={styles.serviceRow}>
-                  <View style={styles.infoCol}>
-                    <Text style={typography.h3}>{item.name}</Text>
-                    <Text style={typography.subtitle}>Precio: ${item.price} COP</Text>
-                    <Text style={[typography.body, { marginTop: 4 }]}>Duración: {item.durationMinutes} min</Text>
-                    <Text style={typography.caption}>
-                      Requiere Vet: {item.requiresVeterinarian ? 'Sí' : 'No'}
-                    </Text>
-                  </View>
-                  <View style={styles.buttonCol}>
-                    <Button
-                      title="Editar"
-                      onPress={() => openForm(item)}
-                      style={styles.smallButtonSecondary}
-                      textStyle={styles.smallButtonText}
-                    />
-                    <Button
-                      title="Eliminar"
-                      onPress={() => onDelete(item.id)}
-                      style={styles.smallButtonDanger}
-                      textStyle={styles.smallButtonText}
-                    />
+              <View style={[styles.serviceCard, { borderLeftWidth: 4, borderLeftColor: colors.secondary }]}>
+                <View style={styles.serviceHeader}>
+                  <Text style={[typography.h3, { marginBottom: 4 }]}>🏥 {item.name}</Text>
+                  <View style={[styles.badge, { backgroundColor: item.active ? colors.primary : colors.danger }]}>
+                    <Text style={styles.badgeText}>{item.active ? 'Activo' : 'Inactivo'}</Text>
                   </View>
                 </View>
-              </Card>
+                <View style={styles.divider} />
+                <View style={styles.infoCol}>
+                  <Text style={[typography.caption, { color: colors.muted }]}>💰 Precio</Text>
+                  <Text style={[typography.body, { marginTop: 4 }]}>${item.price} COP</Text>
+                  <Text style={[typography.caption, { color: colors.muted, marginTop: 8 }]}>⏱️ Duración</Text>
+                  <Text style={[typography.body, { marginTop: 4 }]}>{item.durationMinutes} min</Text>
+                  <Text style={[typography.caption, { color: colors.muted, marginTop: 8 }]}>🏥 Requiere Vet</Text>
+                  <Text style={[typography.body, { marginTop: 4 }]}>{item.requiresVeterinarian ? 'Sí' : 'No'}</Text>
+                </View>
+                <View style={styles.divider} />
+                <View style={styles.buttonCol}>
+                  <TouchableOpacity 
+                    onPress={() => openForm(item)} 
+                    style={[styles.smallBtn, { backgroundColor: colors.secondary }]}
+                  >
+                    <Text style={styles.smallBtnText}>Editar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    onPress={() => onDelete(item.id)} 
+                    style={[styles.smallBtn, { backgroundColor: colors.danger, marginTop: 8 }]}
+                  >
+                    <Text style={styles.smallBtnText}>Eliminar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </TouchableOpacity>
           )}
         />
@@ -132,32 +146,47 @@ export default function ServicesAdmin() {
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   container: { flex: 1, backgroundColor: colors.background, paddingTop: 12 },
-  list: { paddingHorizontal: 16, paddingBottom: 24 },
-  actionsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
-  serviceRow: { flexDirection: 'row', alignItems: 'flex-start' },
-  infoCol: { flex: 1, paddingRight: 12 },
-  buttonCol: { width: 140, justifyContent: 'flex-start' },
-  smallButtonSecondary: {
-    backgroundColor: colors.secondary,
-    paddingVertical: 10,
+  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
+  topButtonsContainer: { paddingHorizontal: 16, marginBottom: 16, flexDirection: 'row', gap: 8 },
+  addButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  addButtonText: { color: colors.white, fontWeight: '700', fontSize: 15 },
+  serviceCard: { backgroundColor: colors.white, borderRadius: 12, padding: 12 },
+  serviceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  badge: { paddingVertical: 4, paddingHorizontal: 10, borderRadius: 20, alignSelf: 'flex-start' },
+  badgeText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  divider: { height: 1, backgroundColor: '#EEF2F3', marginVertical: 12 },
+  infoCol: { marginBottom: 8 },
+  buttonCol: { width: '100%' },
+  smallBtn: { paddingVertical: 10, paddingHorizontal: 12, borderRadius: 8, alignItems: 'center' },
+  smallBtnText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     marginBottom: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
   },
-  smallButtonDanger: {
-    backgroundColor: colors.danger,
-    paddingVertical: 10,
-    borderRadius: 10,
-    marginTop: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+  headerEmoji: {
+    fontSize: 40,
+    marginBottom: 8,
   },
-  smallButtonText: { fontSize: 15, fontWeight: '600' },
+  headerTitle: {
+    color: colors.darkGray,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: colors.muted,
+  },
 });

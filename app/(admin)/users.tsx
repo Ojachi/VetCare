@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, View, Text } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import EditUserForm from '../../components/admin/EditUserForm';
 import UserDetailContent from '../../components/admin/UserDetailContent';
@@ -7,8 +7,8 @@ import UserList from '../../components/admin/UserList';
 import DetailModal from '../../components/ui/DetailModal';
 import EmptyState from '../../components/ui/EmptyState';
 import colors from '../../styles/colors';
-import { alertApiError } from '../../utils/apiError';
 import typography from '../../styles/typography';
+import { alertApiError } from '../../utils/apiError';
 
 type User = {
   id: number;
@@ -93,7 +93,11 @@ export default function Users() {
 
   return (
     <View style={styles.container}>
-      <Text style={[typography.h2, { paddingHorizontal: 16 }]}>Gestión de Usuarios</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerEmoji}>👤</Text>
+        <Text style={[typography.h2, styles.headerTitle]}>Gestión de Usuarios</Text>
+        <Text style={styles.headerSubtitle}>Administra usuarios del sistema</Text>
+      </View>
       {users.length === 0 ? (
         <EmptyState title="Sin usuarios" message="Aún no hay usuarios registrados." />
       ) : (
@@ -123,5 +127,23 @@ export default function Users() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: 12 },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    marginBottom: 8,
+  },
+  headerEmoji: {
+    fontSize: 40,
+    marginBottom: 8,
+  },
+  headerTitle: {
+    color: colors.darkGray,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: colors.muted,
+  },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });
