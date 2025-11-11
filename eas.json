@@ -9,7 +9,13 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://vetcare-back-z6d9.onrender.com",
+        "API_URL_ANDROID": "https://vetcare-back-z6d9.onrender.com",
+        "API_URL_IOS": "https://vetcare-back-z6d9.onrender.com",
+        "API_URL_DEVICE": "https://vetcare-back-z6d9.onrender.com"
+      }
     },
     "production": {
       "autoIncrement": true
