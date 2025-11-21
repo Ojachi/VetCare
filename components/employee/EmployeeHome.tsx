@@ -129,10 +129,10 @@ const menuItems = [
   },
   {
     id: 3,
-    icon: '✏️',
-    label: 'Editar Mascota',
-    description: 'Modificar datos',
-    path: '/(employee)/edit-pet',
+    icon: '🐕',
+    label: 'Ver Mascotas',
+    description: 'Editar datos de mascotas',
+    path: '/(employee)/mascotas',
     color: colors.warning,
   },
   {

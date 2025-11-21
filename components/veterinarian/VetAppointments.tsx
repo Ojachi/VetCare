@@ -25,6 +25,7 @@ type Appointment = {
 
 export default function VetAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [diagnoses, setDiagnoses] = useState<any[]>([]);
   const [filterStatus, setFilterStatus] = useState<'ALL' | string>('ALL');
   const [filterServiceId, setFilterServiceId] = useState<number | null>(null);
   const [services, setServices] = useState<any[]>([]);
@@ -39,9 +40,10 @@ export default function VetAppointments() {
   const fetchAppointments = async () => {
     setLoading(true);
     try {
-      const [appsRes, servicesRes] = await Promise.all([
+      const [appsRes, servicesRes, diagnosisRes] = await Promise.all([
         axiosClient.get('/api/appointments'),
         axiosClient.get('/api/services'),
+        axiosClient.get('/api/diagnoses/my-diagnoses'),
       ]);
       const all = appsRes.data || [];
       const filteredByVet = (user && (user.role === 'VETERINARIAN' || user.role === 'VET'))
@@ -49,6 +51,7 @@ export default function VetAppointments() {
         : all;
       setAppointments(filteredByVet);
       setServices(servicesRes.data || []);
+      setDiagnoses(diagnosisRes.data || []);
     } catch (err) {
       console.error(err);
       alertApiError(err, 'No se pudieron cargar las citas.');
@@ -79,6 +82,10 @@ export default function VetAppointments() {
       default:
         return colors.muted;
     }
+  };
+
+  const hasDiagnosis = (appointmentId: string): boolean => {
+    return diagnoses.some((d: any) => d.appointment?.id === appointmentId);
   };
 
   const renderItem = ({ item }: { item: Appointment }) => (
@@ -124,22 +131,22 @@ export default function VetAppointments() {
             />
           )}
           
-          {/* Completar: Si está ACCEPTED, CONFIRMED o después de PENDING */}
-          {['ACCEPTED', 'CONFIRMED', 'PENDING'].includes(String(item.status).toUpperCase()) && (
-            <Button
-              title="Completar"
-              onPress={() => handleMarkDone(item.id)}
-              style={styles.buttonPrimary}
-              textStyle={styles.actionButtonText}
-            />
-          )}
-          
-          {/* Dx: Si está ACCEPTED, CONFIRMED o PENDING (antes de completar) */}
-          {['ACCEPTED', 'CONFIRMED', 'PENDING'].includes(String(item.status).toUpperCase()) && (
+          {/* Dx: Solo si está ACCEPTED y NO tiene diagnóstico */}
+          {String(item.status).toUpperCase() === 'ACCEPTED' && !hasDiagnosis(item.id) && (
             <Button
               title="Dx"
               onPress={() => handleDiagnose(item)}
               style={styles.buttonWarning}
+              textStyle={styles.actionButtonText}
+            />
+          )}
+          
+          {/* Completar: Si está ACCEPTED y YA tiene diagnóstico */}
+          {String(item.status).toUpperCase() === 'ACCEPTED' && hasDiagnosis(item.id) && (
+            <Button
+              title="Completar"
+              onPress={() => handleMarkDone(item.id)}
+              style={styles.buttonPrimary}
               textStyle={styles.actionButtonText}
             />
           )}
@@ -171,8 +178,8 @@ export default function VetAppointments() {
 
   const handleConfirm = async (id: string) => {
     try {
-      await axiosClient.put(`/api/appointments/${id}/status`, { status: 'CONFIRMED' });
-      Alert.alert('Éxito', 'Cita confirmada');
+      await axiosClient.put(`/api/appointments/${id}/status`, { status: 'ACCEPTED' });
+      Alert.alert('Éxito', 'Cita confirmada. Registra el diagnóstico cuando estés listo.');
       fetchAppointments();
     } catch (err) {
       console.error(err);
@@ -394,8 +401,6 @@ export default function VetAppointments() {
                   </Text>
                 )}
               </Card>
-
-              
             </>
           ) : null}
         </ScrollView>

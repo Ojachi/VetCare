@@ -30,7 +30,7 @@ export default function PatientHistory() {
   const fetchDiagnoses = async () => {
     setLoading(true);
     try {
-      const res = await axiosClient.get('/api/diagnoses');
+      const res = await axiosClient.get('/api/diagnoses/my-diagnoses');
       setDiagnoses(res.data || []);
     } catch (err) {
       console.error(err);

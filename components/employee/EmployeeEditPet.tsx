@@ -9,14 +9,20 @@ import Button from '../ui/Button';
 import Card from '../ui/Card';
 import Input from '../ui/Input';
 
-export default function EmployeeEditPet() {
+type EmployeeEditPetProps = {
+  pet?: any;
+  onSaved?: () => void;
+  onCancel?: () => void;
+};
+
+export default function EmployeeEditPet({ pet: initialPet, onSaved, onCancel }: EmployeeEditPetProps = {}) {
   const router = useRouter();
   const params = useLocalSearchParams<{ petId?: string }>();
-  const petId = params?.petId;
+  const petId = params?.petId || (initialPet?.id ? String(initialPet.id) : null);
   
   const [loading, setLoading] = useState(false);
-  const [loadingPet, setLoadingPet] = useState(true);
-  const [pet, setPet] = useState<any>(null);
+  const [loadingPet, setLoadingPet] = useState(!initialPet);
+  const [pet, setPet] = useState<any>(initialPet || null);
   const [owners, setOwners] = useState<any[]>([]);
 
   useEffect(() => {
@@ -52,7 +58,11 @@ export default function EmployeeEditPet() {
     try {
       await axiosClient.put(`/api/pets/${petId}`, pet);
       Alert.alert('Éxito', 'Mascota actualizada correctamente');
-      router.back();
+      if (onSaved) {
+        onSaved();
+      } else {
+        router.back();
+      }
     } catch {
       Alert.alert('Error', 'No se pudo actualizar la mascota');
     } finally {
@@ -180,7 +190,7 @@ export default function EmployeeEditPet() {
             />
             <Button 
               title="✕ Cancelar" 
-              onPress={() => router.back()}
+              onPress={onCancel ? onCancel : () => router.back()}
               disabled={loading}
               style={styles.cancelButton}
             />

@@ -20,9 +20,13 @@ export default function ChangePassword() {
       Alert.alert('Error', 'Las contraseñas no coinciden');
       return;
     }
+    if (newPassword.length < 6) {
+      Alert.alert('Error', 'La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
     setLoading(true);
     try {
-      await axiosClient.post('/api/auth/change-password', { currentPassword, newPassword });
+      await axiosClient.put('/api/users/change-password', { currentPassword, newPassword, confirmPassword });
       Alert.alert('Éxito', 'Contraseña actualizada');
       setCurrentPassword('');
       setNewPassword('');

@@ -1,12 +1,12 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import { useSession } from '../../context/SessionContext';
@@ -45,8 +45,8 @@ export default function VetHome() {
 
       setStats({
         totalAppointments: vetAppointments.length,
-        pendingAppointments: vetAppointments.filter((a: any) => a.status === 'pendiente').length,
-        completedAppointments: vetAppointments.filter((a: any) => a.status === 'completada').length,
+        pendingAppointments: vetAppointments.filter((a: any) => String(a.status).toUpperCase() === 'PENDING').length,
+        completedAppointments: vetAppointments.filter((a: any) => String(a.status).toUpperCase() === 'COMPLETED').length,
       });
     } catch (err) {
       alertApiError(err, 'Error al cargar el dashboard');

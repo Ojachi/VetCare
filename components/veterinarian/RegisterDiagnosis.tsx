@@ -1,12 +1,12 @@
+import { alertApiError } from '@/utils/apiError';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import { SessionContext } from '../../context/SessionContext';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
-import { alertApiError } from '../../utils/apiError';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import Input from '../ui/Input';
@@ -19,8 +19,9 @@ export default function RegisterDiagnosis() {
   const [medications, setMedications] = useState('');
   const [loading, setLoading] = useState(false);
   const [appointmentId, setAppointmentId] = useState<string>('');
-  const router = useRouter();
+  const [isActive, setIsActive] = useState(true);
   useContext(SessionContext); // maintain session context
+  const router = useRouter();
   const { petId: qPetId, appointmentId: qAppointmentId } = useLocalSearchParams<{ petId?: string; appointmentId?: string }>();
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function RegisterDiagnosis() {
         appointmentId: appointmentId ? Number(appointmentId) : undefined,
         description,
         date,
+        active: isActive,
       };
       if (treatment.trim()) payload.treatment = treatment.trim();
       if (medications.trim()) payload.medications = medications.trim();
@@ -149,20 +151,34 @@ export default function RegisterDiagnosis() {
             />
           </View>
 
+          {/* Active Status Toggle */}
+          <View style={styles.fieldGroup}>
+            <View style={styles.switchContainer}>
+              <Text style={styles.fieldLabel}>✓ Diagnóstico Activo</Text>
+              <Switch 
+                value={isActive} 
+                onValueChange={setIsActive}
+                trackColor={{ false: colors.lightGray, true: colors.primary }}
+              />
+            </View>
+          </View>
+
           {/* Buttons */}
           <View style={styles.buttonGroup}>
-            <Button 
-              title={loading ? 'Guardando...' : '✓ Registrar Diagnóstico'} 
-              onPress={submit} 
-              disabled={loading}
-              style={styles.submitButton}
-            />
-            <Button 
-              title="✕ Cancelar" 
-              onPress={() => router.back()}
-              disabled={loading}
-              style={styles.cancelButton}
-            />
+            <View style={styles.buttonRow}>
+              <Button 
+                title={loading ? 'Guardando...' : '✓ Registrar'} 
+                onPress={submit} 
+                disabled={loading}
+                style={styles.submitButton}
+              />
+              <Button 
+                title="✕ Cancelar" 
+                onPress={() => router.back()}
+                disabled={loading}
+                style={styles.cancelButton}
+              />
+            </View>
           </View>
         </Card>
 
@@ -207,7 +223,8 @@ const styles = StyleSheet.create({
 
   // Form Card
   formCard: {
-    paddingVertical: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
   },
 
   // Fields
@@ -218,10 +235,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.darkGray,
-    marginBottom: 8,
+    marginBottom: 10,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   input: {
-    marginBottom: 0,
+    marginBottom: 50,
+    minHeight: 100,
   },
 
   // Picker
@@ -238,10 +261,20 @@ const styles = StyleSheet.create({
     marginTop: 24,
     gap: 10,
   },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
   submitButton: {
     backgroundColor: colors.primary,
+    flex: 1,
+    marginVertical: 0,
+    paddingVertical: 10,
   },
   cancelButton: {
     backgroundColor: colors.secondary,
+    flex: 1,
+    marginVertical: 0,
+    paddingVertical: 10,
   },
 });

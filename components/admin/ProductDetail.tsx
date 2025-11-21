@@ -34,6 +34,11 @@ export default function ProductDetail({ product }: { product: any }) {
           <Text style={[typography.caption, { color: colors.muted }]}>Precio</Text>
           <Text style={[typography.body, { marginTop: 6, fontSize: 18, fontWeight: '700', color: colors.primary }]}>${product.price} COP</Text>
         </View>
+        <View style={styles.divider} />
+        <View style={styles.infoRow}>
+          <Text style={[typography.caption, { color: colors.muted }]}>Stock</Text>
+          <Text style={[typography.body, { marginTop: 6, fontSize: 16, fontWeight: '600', color: product.stock > 0 ? colors.primary : colors.danger }]}>📦 {product.stock ?? 0} unidades</Text>
+        </View>
       </Card>
     </View>
   );

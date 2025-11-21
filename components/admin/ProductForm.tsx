@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
@@ -9,27 +9,49 @@ import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import { alertApiError } from '../../utils/apiError';
 
+type Category = {
+  id: number;
+  name: string;
+};
+
 export default function ProductForm({ product, onSaved, onCancel }: { product?: any | null; onSaved: (p: any) => void; onCancel: () => void }) {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState(product?.name ?? '');
   const [description, setDescription] = useState(product?.description ?? '');
   const [price, setPrice] = useState(product?.price ? String(product.price) : '');
+  const [stock, setStock] = useState(product?.stock ? String(product.stock) : '');
   const [image, setImage] = useState<string>(product?.image ?? '');
+  const [imageMimeType, setImageMimeType] = useState<string>('image/jpeg');
   const [previewUri, setPreviewUri] = useState<string | undefined>(undefined);
   const [descHeight, setDescHeight] = useState(100);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(product?.categoryId ?? null);
+  const [showCategories, setShowCategories] = useState(false);
 
   useEffect(() => {
     setName(product?.name ?? '');
     setDescription(product?.description ?? '');
     setPrice(product?.price ? String(product.price) : '');
+    setStock(product?.stock ? String(product.stock) : '');
     setImage(product?.image ?? '');
+    setSelectedCategoryId(product?.categoryId ?? null);
     if (product?.image) {
       if (product.image.startsWith('data:') || product.image.startsWith('http')) setPreviewUri(product.image);
       else setPreviewUri(`data:image/jpeg;base64,${product.image}`);
     } else {
       setPreviewUri(undefined);
     }
+    loadCategories();
   }, [product]);
+
+  const loadCategories = async () => {
+    try {
+      const res = await axiosClient.get<Category[]>('/api/categories');
+      setCategories(res.data || []);
+    } catch (error) {
+      alertApiError(error, 'No se pudieron cargar las categorías');
+    }
+  };
 
   const { pickImage } = useImagePicker();
 
@@ -41,14 +63,17 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
     }
     const asset = res.assets?.[0];
     if (!asset) return;
+    const mimeType = asset.mimeType ?? 'image/jpeg';
     if (asset.base64) {
       setImage(asset.base64);
-      setPreviewUri(`data:${asset.mimeType ?? 'image/jpeg'};base64,${asset.base64}`);
+      setImageMimeType(mimeType);
+      setPreviewUri(`data:${mimeType};base64,${asset.base64}`);
     } else if (asset.uri) {
       try {
         const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: 'base64' as any });
         setImage(base64);
-        setPreviewUri(`data:${asset.mimeType ?? 'image/jpeg'};base64,${base64}`);
+        setImageMimeType(mimeType);
+        setPreviewUri(`data:${mimeType};base64,${base64}`);
       } catch (e) {
         console.error('readAsStringAsync error', e);
         Alert.alert('Error', 'No se pudo leer la imagen seleccionada');
@@ -57,12 +82,24 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
   };
 
   const onSubmit = async () => {
-    if (!name || !price) {
-      Alert.alert('Error', 'Por favor completa nombre y precio');
+    if (!name || !price || !stock) {
+      Alert.alert('Error', 'Por favor completa nombre, precio y stock');
       return;
     }
     setLoading(true);
-    const payload: any = { name, description, price: Number(price), image: image || null };
+    const imageData = image
+      ? image.startsWith('data:')
+        ? image
+        : `data:${imageMimeType};base64,${image}`
+      : null;
+    const payload: any = { 
+      name, 
+      description, 
+      price: Number(price), 
+      stock: Number(stock), 
+      image: imageData,
+      ...(selectedCategoryId && { categoryId: selectedCategoryId })
+    };
     
     try {
       let res;
@@ -79,6 +116,8 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
       setLoading(false);
     }
   };
+
+  const selectedCategory = categories.find(c => c.id === selectedCategoryId);
 
   return (
     <View style={styles.container}>
@@ -112,6 +151,51 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
           
           <Text style={[typography.caption, { color: colors.muted, marginBottom: 8 }]}>💰 Precio</Text>
           <Input placeholder="0.00" value={price} onChangeText={setPrice} keyboardType="numeric" style={{ marginBottom: 12 }} />
+          
+          <Text style={[typography.caption, { color: colors.muted, marginBottom: 8 }]}>📦 Stock</Text>
+          <Input placeholder="0" value={stock} onChangeText={setStock} keyboardType="numeric" style={{ marginBottom: 12 }} />
+
+          <Text style={[typography.caption, { color: colors.muted, marginBottom: 8 }]}>📂 Categoría</Text>
+          <TouchableOpacity 
+            style={[styles.categoryButton, showCategories && { backgroundColor: colors.secondary }]}
+            onPress={() => setShowCategories(!showCategories)}
+          >
+            <Text style={styles.categoryButtonText}>
+              {selectedCategory ? selectedCategory.name : 'Seleccionar categoría'}
+            </Text>
+          </TouchableOpacity>
+          
+          {showCategories && (
+            <View style={styles.categoryDropdown}>
+              <FlatList
+                data={categories}
+                keyExtractor={(item) => item.id.toString()}
+                scrollEnabled={false}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.categoryOption,
+                      selectedCategoryId === item.id && styles.categoryOptionSelected
+                    ]}
+                    onPress={() => {
+                      setSelectedCategoryId(item.id);
+                      setShowCategories(false);
+                    }}
+                  >
+                    <Text style={[
+                      styles.categoryOptionText,
+                      selectedCategoryId === item.id && styles.categoryOptionTextSelected
+                    ]}>
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                ListEmptyComponent={
+                  <Text style={styles.noCategoriesText}>No hay categorías</Text>
+                }
+              />
+            </View>
+          )}
           
           {previewUri ? (
             <View style={styles.previewContainer}>
@@ -158,6 +242,51 @@ const styles = StyleSheet.create({
   headerEmoji: { fontSize: 40 },
   form: { paddingBottom: 16, gap: 0 },
   formCard: { padding: 12, marginBottom: 16 },
+  
+  categoryButton: {
+    backgroundColor: colors.lightGray,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  categoryButtonText: {
+    fontSize: 14,
+    color: colors.darkGray,
+    fontWeight: '500',
+  },
+  categoryDropdown: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+    borderRadius: 8,
+    marginBottom: 12,
+    maxHeight: 200,
+  },
+  categoryOption: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.lightGray,
+  },
+  categoryOptionSelected: {
+    backgroundColor: colors.secondary,
+  },
+  categoryOptionText: {
+    fontSize: 14,
+    color: colors.darkGray,
+  },
+  categoryOptionTextSelected: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  noCategoriesText: {
+    padding: 12,
+    textAlign: 'center',
+    color: colors.muted,
+    fontSize: 13,
+  },
+  
   previewContainer: { marginBottom: 12, borderRadius: 12, overflow: 'hidden' },
   preview: { width: '100%', height: 180, borderRadius: 12, backgroundColor: '#eee' },
   textarea: { minHeight: 100, textAlignVertical: 'top' },

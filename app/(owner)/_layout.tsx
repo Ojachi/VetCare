@@ -32,21 +32,21 @@ export default function OwnerLayout() {
 		</ScreenBackground>
 	);
 
-	const visibleTabs = ['index', 'mascotas', 'citas', 'diagnosticos', 'perfil', 'productos'];
+	const visibleTabs = ['index', 'mascotas', 'citas', 'diagnosticos', 'productos', 'chat-ia', 'compras', 'perfil'];
 
-		const iconFor = (name: string, color: string, size: number) => {
-			switch (name) {
-				case 'index': return <MaterialIcons name="home" color={color} size={size} />;
-				case 'mascotas': return <FontAwesome5 name="paw" color={color} size={size} />;
-				case 'citas': return <MaterialIcons name="event-available" color={color} size={size} />;
-				case 'diagnosticos': return <FontAwesome5 name="file-medical-alt" color={color} size={size} />;
-				case 'perfil': return <MaterialIcons name="person" color={color} size={size} />;
-				case 'productos': return <FontAwesome5 name="shopping-bag" color={color} size={size} />;
-				default: return null;
-			}
-		};
-
-		return (
+	const iconFor = (name: string, color: string, size: number) => {
+		switch (name) {
+			case 'index': return <MaterialIcons name="home" color={color} size={size} />;
+			case 'mascotas': return <FontAwesome5 name="paw" color={color} size={size} />;
+			case 'citas': return <MaterialIcons name="event-available" color={color} size={size} />;
+			case 'diagnosticos': return <FontAwesome5 name="file-medical-alt" color={color} size={size} />;
+			case 'productos': return <FontAwesome5 name="shopping-bag" color={color} size={size} />;
+			case 'chat-ia': return <MaterialIcons name="chat" color={color} size={size} />;
+			case 'compras': return <FontAwesome5 name="shopping-cart" color={color} size={size} />;
+			case 'perfil': return <MaterialIcons name="person" color={color} size={size} />;
+			default: return null;
+		}
+	};		return (
 			<ScreenBackground>
 				<OwnerHeader title="VetCare" showCart />
 				<Tabs
@@ -61,12 +61,14 @@ export default function OwnerLayout() {
 						tabBar: (props: any) => <EqualWidthTabBar {...props} visibleTabs={visibleTabs} />,
 					})}
 				>
-					<Tabs.Screen name="index" options={{ title: 'Inicio' }} />
-					<Tabs.Screen name="mascotas" options={{ title: 'Mascotas' }} />
-					<Tabs.Screen name="citas" options={{ title: 'Citas' }} />
-					<Tabs.Screen name="diagnosticos" options={{ title: 'Diagnósticos' }} />
-					<Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
-					<Tabs.Screen name="productos" options={{ title: 'Productos' }} />
+				<Tabs.Screen name="index" options={{ title: 'Inicio' }} />
+				<Tabs.Screen name="mascotas" options={{ title: 'Mascotas' }} />
+				<Tabs.Screen name="citas" options={{ title: 'Citas' }} />
+				<Tabs.Screen name="diagnosticos" options={{ title: 'Diagnósticos' }} />
+				<Tabs.Screen name="productos" options={{ title: 'Productos' }} />
+				<Tabs.Screen name="chat-ia" options={{ title: 'Chat IA' }} />
+				<Tabs.Screen name="compras" options={{ title: 'Mis Compras' }} />
+				<Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
 				</Tabs>
 			</ScreenBackground>
 		);

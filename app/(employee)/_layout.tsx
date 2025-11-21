@@ -40,13 +40,13 @@ export default function EmployeeLayout() {
 					tabBarActiveTintColor: '#2E8B57',
 					tabBarInactiveTintColor: '#6B7280',
 					tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#EEF2F3', height: 60, paddingBottom: 6 },
-					tabBarLabelStyle: { fontWeight: '600' },
+					tabBarLabelStyle: { fontWeight: '600', fontSize: 10 },
 					tabBarIcon: ({ color, size }) => {
 						switch (route.name) {
 							case 'index': return <MaterialIcons name="home" color={color} size={size} />;
 							case 'employee-appointments': return <MaterialIcons name="event-available" color={color} size={size} />;
+							case 'mascotas': return <MaterialIcons name="pets" color={color} size={size} />;
 							case 'register-pet': return <MaterialIcons name="add-circle" color={color} size={size} />;
-							case 'edit-pet': return <MaterialIcons name="edit" color={color} size={size} />;
 							case 'perfil': return <MaterialIcons name="person" color={color} size={size} />;
 							default: return null;
 						}
@@ -55,8 +55,8 @@ export default function EmployeeLayout() {
 			>
 				<Tabs.Screen name="index" options={{ title: 'Inicio' }} />
 				<Tabs.Screen name="employee-appointments" options={{ title: 'Citas' }} />
+				<Tabs.Screen name="mascotas" options={{ title: 'Mascotas' }} />
 				<Tabs.Screen name="register-pet" options={{ title: 'Registrar' }} />
-				<Tabs.Screen name="edit-pet" options={{ title: 'Editar' }} />
 				<Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
 			</Tabs>
 		</ScreenBackground>

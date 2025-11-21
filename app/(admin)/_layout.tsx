@@ -137,6 +137,16 @@ export default function AdminLayout() {
           }}
         />
         <Tabs.Screen
+          name="purchases"
+          options={{
+            title: "Compras",
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome5 name="cash-register" color={color} size={size} />
+            ),
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
           name="perfil"
           options={{
             title: "Perfil",

@@ -8,16 +8,16 @@ import { alertApiError } from '../../utils/apiError';
 import { ensureDataUri } from '../../utils/image';
 import EmptyState from '../ui/EmptyState';
 
-export default function ProductsListOwner({ onOpenProduct }: { onOpenProduct?: (id: string) => void }) {
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function ProductsListOwner({ onOpenProduct, products: initialProducts }: { onOpenProduct?: (id: string) => void; products?: any[] }) {
+  const [products, setProducts] = useState<any[]>(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProducts);
   const router = useRouter();
 
   const load = async () => {
     setLoading(true);
     try { const res = await axiosClient.get('/api/products'); setProducts(res.data || []); } catch (err) { alertApiError(err, 'No se pudieron cargar los productos'); } finally { setLoading(false); }
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (!initialProducts) load(); }, [initialProducts]);
 
   if (loading) return <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>;
   if (!loading && products.length === 0) return <View style={[styles.center, { backgroundColor: colors.background }]}><EmptyState title="Sin productos" message="Pronto encontrarás aquí artículos para tus mascotas." /></View>;
@@ -27,6 +27,7 @@ export default function ProductsListOwner({ onOpenProduct }: { onOpenProduct?: (
       {item.image ? <Image source={{ uri: ensureDataUri(item.image) }} style={styles.thumb} /> : <View style={[styles.thumb, styles.thumbPlaceholder]} />}
       <Text style={[typography.body, styles.name]} numberOfLines={1}>{item.name}</Text>
       <Text style={styles.price}>${Number(item.price).toLocaleString('es-CO')} COP</Text>
+      <Text style={[styles.stock, { color: item.stock > 0 ? colors.primary : colors.danger }]}>📦 {item.stock ?? 0}</Text>
     </TouchableOpacity>
   );
 
@@ -40,4 +41,5 @@ const styles = StyleSheet.create({
   thumbPlaceholder: { backgroundColor: '#eef2f3' },
   name: { fontWeight: '700', textAlign: 'center' },
   price: { marginTop: 4, color: colors.muted },
+  stock: { marginTop: 4, fontSize: 12, fontWeight: '600' },
 });

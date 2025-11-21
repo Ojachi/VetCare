@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+    textAlign: 'center',
   },
   textDisabled: {
     color: '#f2f6ff',

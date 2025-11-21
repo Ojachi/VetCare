@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import axiosClient from '../../api/axiosClient';
-import PetFormOwner from '../../components/owner/PetFormOwner';
-import Button from '../../components/ui/Button';
-import DetailModal from '../../components/ui/DetailModal';
-import colors from '../../styles/colors';
-import typography from '../../styles/typography';
-import { alertApiError } from '../../utils/apiError';
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import axiosClient from "../../api/axiosClient";
+import PetFormOwner from "../../components/owner/PetFormOwner";
+import Button from "../../components/ui/Button";
+import DetailModal from "../../components/ui/DetailModal";
+import colors from "../../styles/colors";
+import typography from "../../styles/typography";
+import { alertApiError } from "../../utils/apiError";
 
 type Pet = {
   id: string;
@@ -32,7 +33,8 @@ export default function MascotasOwner() {
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [formModalVisible, setFormModalVisible] = useState(false);
-  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [formMode, setFormMode] = useState<"create" | "edit">("create");
+  const router = useRouter();
 
   useEffect(() => {
     loadPets();
@@ -40,10 +42,10 @@ export default function MascotasOwner() {
 
   const loadPets = async () => {
     try {
-      const response = await axiosClient.get<Pet[]>('/api/pets');
+      const response = await axiosClient.get<Pet[]>("/api/pets");
       setPets(response.data || []);
     } catch {
-      Alert.alert('Error', 'No se pudieron cargar las mascotas');
+      Alert.alert("Error", "No se pudieron cargar las mascotas");
     } finally {
       setLoading(false);
     }
@@ -59,9 +61,9 @@ export default function MascotasOwner() {
     setDetailModalVisible(false);
   };
 
-  const openFormModal = (mode: 'create' | 'edit', pet?: Pet) => {
+  const openFormModal = (mode: "create" | "edit", pet?: Pet) => {
     setFormMode(mode);
-    if (mode === 'edit' && pet) {
+    if (mode === "edit" && pet) {
       setSelectedPet(pet);
     } else {
       setSelectedPet(null);
@@ -91,12 +93,18 @@ export default function MascotasOwner() {
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <View style={styles.headerContent}>
-          <Text style={[typography.h2, { color: colors.darkGray, marginBottom: 4 }]}>🐾 Mis Mascotas</Text>
-          <Text style={[typography.body, { color: colors.muted }]}>Gestiona la información de tus mascotas</Text>
+          <Text
+            style={[typography.h2, { color: colors.darkGray, marginBottom: 4 }]}
+          >
+            🐾 Mis Mascotas
+          </Text>
+          <Text style={[typography.body, { color: colors.muted }]}>
+            Gestiona la información de tus mascotas
+          </Text>
         </View>
         <Button
           title="+ Agregar"
-          onPress={() => openFormModal('create')}
+          onPress={() => openFormModal("create")}
           style={styles.addButton}
           textStyle={styles.addButtonText}
         />
@@ -107,36 +115,67 @@ export default function MascotasOwner() {
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={[typography.body, { fontSize: 16, marginBottom: 8 }]}>🐕 No hay mascotas registradas</Text>
-            <Text style={[typography.body, { color: colors.muted, textAlign: 'center' }]}>
-              Presiona el botón &quot;Agregar&quot; para registrar tu primera mascota
+            <Text style={[typography.body, { fontSize: 16, marginBottom: 8 }]}>
+              🐕 No hay mascotas registradas
+            </Text>
+            <Text
+              style={[
+                typography.body,
+                { color: colors.muted, textAlign: "center" },
+              ]}
+            >
+              Presiona el botón &quot;Agregar&quot; para registrar tu primera
+              mascota
             </Text>
           </View>
         }
         renderItem={({ item }) => (
-          <TouchableOpacity activeOpacity={0.85} onPress={() => openDetailModal(item)}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => openDetailModal(item)}
+          >
             <View style={styles.petCard}>
               <View style={styles.petIconContainer}>
                 <Text style={styles.petIcon}>
-                  {item.species.toLowerCase().includes('perro') || item.species.toLowerCase().includes('dog') ? '🐕' : '🐱'}
+                  {item.species.toLowerCase().includes("perro") ||
+                  item.species.toLowerCase().includes("dog")
+                    ? "🐕"
+                    : "🐱"}
                 </Text>
               </View>
               <View style={styles.petInfo}>
-                <Text style={[typography.h3, { color: colors.primary }]}>{item.name}</Text>
-                <Text style={[typography.body, { marginTop: 4, color: colors.muted }]}>
+                <Text style={[typography.h3, { color: colors.primary }]}>
+                  {item.name}
+                </Text>
+                <Text
+                  style={[
+                    typography.body,
+                    { marginTop: 4, color: colors.muted },
+                  ]}
+                >
                   {item.species} • {item.breed}
                 </Text>
                 <View style={styles.petDetails}>
-                  <Text style={[typography.body, { fontSize: 12, color: colors.darkGray }]}>
+                  <Text
+                    style={[
+                      typography.body,
+                      { fontSize: 12, color: colors.darkGray },
+                    ]}
+                  >
                     📅 {item.age} años
                   </Text>
-                  <Text style={[typography.body, { fontSize: 12, color: colors.darkGray, marginLeft: 12 }]}>
+                  <Text
+                    style={[
+                      typography.body,
+                      { fontSize: 12, color: colors.darkGray, marginLeft: 12 },
+                    ]}
+                  >
                     ⚖️ {item.weight} kg
                   </Text>
                 </View>
               </View>
               <Text style={styles.petGender}>
-                {item.sex === 'M' || item.sex === 'Macho' ? '♂️' : '♀️'}
+                {item.sex === "M" || item.sex === "Macho" ? "♂️" : "♀️"}
               </Text>
             </View>
           </TouchableOpacity>
@@ -147,18 +186,6 @@ export default function MascotasOwner() {
       <DetailModal
         visible={detailModalVisible}
         onClose={closeDetailModal}
-        extraFooterButton={
-          selectedPet
-            ? {
-                title: '✏️ Editar',
-                onPress: () => {
-                  closeDetailModal();
-                  setTimeout(() => openFormModal('edit', selectedPet), 300);
-                },
-                style: { backgroundColor: colors.secondary },
-              }
-            : undefined
-        }
       >
         {selectedPet && (
           <>
@@ -166,17 +193,29 @@ export default function MascotasOwner() {
             <View style={styles.detailHeader}>
               <View style={styles.detailAvatarContainer}>
                 <Text style={styles.detailAvatar}>
-                  {selectedPet.species.toLowerCase().includes('perro') || selectedPet.species.toLowerCase().includes('dog') ? '🐕' : '🐱'}
+                  {selectedPet.species.toLowerCase().includes("perro") ||
+                  selectedPet.species.toLowerCase().includes("dog")
+                    ? "🐕"
+                    : "🐱"}
                 </Text>
               </View>
               <View style={styles.detailHeaderText}>
-                <Text style={[typography.h2, { color: colors.primary, marginBottom: 4 }]}>{selectedPet.name}</Text>
+                <Text
+                  style={[
+                    typography.h2,
+                    { color: colors.primary, marginBottom: 4 },
+                  ]}
+                >
+                  {selectedPet.name}
+                </Text>
                 <Text style={[typography.body, { color: colors.muted }]}>
                   {selectedPet.species} • {selectedPet.breed}
                 </Text>
               </View>
               <Text style={styles.detailGenderBadge}>
-                {selectedPet.sex === 'M' || selectedPet.sex === 'Macho' ? '♂️' : '♀️'}
+                {selectedPet.sex === "M" || selectedPet.sex === "Macho"
+                  ? "♂️"
+                  : "♀️"}
               </Text>
             </View>
 
@@ -186,7 +225,9 @@ export default function MascotasOwner() {
               <View style={styles.detailInfoCard}>
                 <Text style={styles.detailInfoIcon}>🦴</Text>
                 <Text style={styles.detailInfoLabel}>Especie</Text>
-                <Text style={styles.detailInfoValue}>{selectedPet.species}</Text>
+                <Text style={styles.detailInfoValue}>
+                  {selectedPet.species}
+                </Text>
               </View>
 
               {/* Raza */}
@@ -200,50 +241,82 @@ export default function MascotasOwner() {
               <View style={styles.detailInfoCard}>
                 <Text style={styles.detailInfoIcon}>📅</Text>
                 <Text style={styles.detailInfoLabel}>Edad</Text>
-                <Text style={styles.detailInfoValue}>{selectedPet.age} años</Text>
+                <Text style={styles.detailInfoValue}>
+                  {selectedPet.age} años
+                </Text>
               </View>
 
               {/* Peso */}
               <View style={styles.detailInfoCard}>
                 <Text style={styles.detailInfoIcon}>⚖️</Text>
                 <Text style={styles.detailInfoLabel}>Peso</Text>
-                <Text style={styles.detailInfoValue}>{selectedPet.weight} kg</Text>
+                <Text style={styles.detailInfoValue}>
+                  {selectedPet.weight} kg
+                </Text>
               </View>
             </View>
 
             {/* Delete Button */}
-            <Button
-              title="🗑️ Eliminar Mascota"
-              onPress={async () => {
-                Alert.alert('Confirmar eliminación', `¿Eliminar a ${selectedPet.name} de tus mascotas?`, [
-                  { text: 'Cancelar', style: 'cancel' },
-                  {
-                    text: 'Eliminar',
-                    onPress: async () => {
-                      try {
-                        await axiosClient.delete(`/api/pets/${selectedPet.id}`);
-                        Alert.alert('Éxito', `${selectedPet.name} ha sido eliminado`);
-                        closeDetailModal();
-                        loadPets();
-                      } catch (err) {
-                        alertApiError(err, 'No se pudo eliminar la mascota');
-                      }
-                    },
-                    style: 'destructive',
-                  },
-                ]);
-              }}
-              style={styles.deleteButton}
-            />
+            <View style={styles.actionButtonsContainer}>
+              <View style={styles.actionButtonsRow}>
+                <Button
+                  title="✏️ Editar"
+                  onPress={() => {
+                    closeDetailModal();
+                    openFormModal("edit", selectedPet);
+                  }}
+                  style={styles.editButton}
+                />
+                <Button
+                  title="🗑️ Eliminar"
+                  onPress={async () => {
+                    Alert.alert(
+                      "Confirmar eliminación",
+                      `¿Eliminar a ${selectedPet.name} de tus mascotas?`,
+                      [
+                        { text: "Cancelar", style: "cancel" },
+                        {
+                          text: "Eliminar",
+                          onPress: async () => {
+                            try {
+                              await axiosClient.delete(
+                                `/api/pets/${selectedPet.id}`
+                              );
+                              Alert.alert(
+                                "Éxito",
+                                `${selectedPet.name} ha sido eliminado`
+                              );
+                              closeDetailModal();
+                              loadPets();
+                            } catch (err) {
+                              alertApiError(
+                                err,
+                                "No se pudo eliminar la mascota"
+                              );
+                            }
+                          },
+                          style: "destructive",
+                        },
+                      ]
+                    );
+                  }}
+                  style={styles.deleteButton}
+                />
+              </View>
+            </View>
           </>
         )}
       </DetailModal>
 
       {/* Form Modal */}
-      <DetailModal visible={formModalVisible} onClose={closeFormModal} showClose={false}>
+      <DetailModal
+        visible={formModalVisible}
+        onClose={closeFormModal}
+        showClose={false}
+      >
         <PetFormOwner
           mode={formMode}
-          petId={formMode === 'edit' ? selectedPet?.id : undefined}
+          petId={formMode === "edit" ? selectedPet?.id : undefined}
           onSaved={handlePetSaved}
           onCancel={closeFormModal}
         />
@@ -254,17 +327,17 @@ export default function MascotasOwner() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+
   headerContainer: {
     paddingHorizontal: 16,
     paddingVertical: 16,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.lightGray,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   headerContent: {
     flex: 1,
@@ -277,25 +350,25 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
   },
-  
+
   list: { padding: 16, paddingTop: 12 },
-  
+
   emptyContainer: {
     padding: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  
+
   petCard: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: colors.white,
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
@@ -306,8 +379,8 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     backgroundColor: colors.lightGray,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   petIcon: {
@@ -317,7 +390,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   petDetails: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 6,
   },
   petGender: {
@@ -327,8 +400,8 @@ const styles = StyleSheet.create({
 
   // Detail Modal Styles
   detailHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 24,
     paddingBottom: 16,
     borderBottomWidth: 2,
@@ -339,8 +412,8 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 35,
     backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   detailAvatar: {
@@ -354,17 +427,17 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   detailInfoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
     marginBottom: 16,
   },
   detailInfoCard: {
-    width: '48%',
+    width: "48%",
     backgroundColor: colors.lightGray,
     borderRadius: 10,
     padding: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   detailInfoIcon: {
     fontSize: 28,
@@ -372,18 +445,34 @@ const styles = StyleSheet.create({
   },
   detailInfoLabel: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.muted,
     marginBottom: 4,
   },
   detailInfoValue: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.primary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   deleteButton: {
     backgroundColor: colors.danger,
+    flex: 1,
+    marginVertical: 0,
+    paddingVertical: 10,
+  },
+  editButton: {
+    backgroundColor: colors.primary,
+    flex: 1,
+    marginVertical: 0,
+    paddingVertical: 10,
+  },
+  actionButtonsContainer: {
+    flex: 1,
+  },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    gap: 10,
     marginTop: 16,
   },
 });

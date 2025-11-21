@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useCart } from '../../context/CartContext';
 import colors from '../../styles/colors';
@@ -6,13 +6,19 @@ import typography from '../../styles/typography';
 import Button from '../ui/Button';
 
 export default function CartOwner({ onCheckout }: { onCheckout?: () => void }) {
-  const { items, total, updateQty, removeItem, checkout } = useCart();
+  const { items, total, updateQty, removeItem, checkout, isLoading } = useCart();
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-  const handleCheckout = () => {
-    const result = checkout({});
-    if (result.ok) {
-      Alert.alert('Éxito', 'Pedido registrado correctamente');
-      onCheckout?.();
+  const handleCheckout = async () => {
+    setCheckoutLoading(true);
+    try {
+      const result = await checkout({});
+      if (result.ok) {
+        Alert.alert('Éxito', 'Pedido registrado correctamente');
+        onCheckout?.();
+      }
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
@@ -95,6 +101,7 @@ export default function CartOwner({ onCheckout }: { onCheckout?: () => void }) {
       <Button
         title={`Finalizar Compra - $${total.toFixed(2)}`}
         onPress={handleCheckout}
+        disabled={checkoutLoading}
         style={{ backgroundColor: colors.success }}
       />
     </View>

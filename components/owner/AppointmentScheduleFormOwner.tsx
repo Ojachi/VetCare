@@ -12,6 +12,7 @@ import Input from '../ui/Input';
 
 type Pet = { id: number; name: string };
 type Service = { id: number; name: string; price: number; requiresVet?: boolean };
+type AvailableProfessional = { professional: { id: number; name: string }; available: boolean; nextAvailableSlot: string };
 
 export default function AppointmentScheduleFormOwner({
   petId: propPetId,
@@ -27,10 +28,10 @@ export default function AppointmentScheduleFormOwner({
   const [serviceId, setServiceId] = useState<number | null>(null);
   const [assignedToId, setAssignedToId] = useState<number | null>(null);
   const [services, setServices] = useState<Service[]>([]);
-  const [allUsers, setAllUsers] = useState<{ id: number; name: string; role: string }[]>([]);
   const [filteredStaff, setFilteredStaff] = useState<{ id: number; name: string }[]>([]);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingStaff, setLoadingStaff] = useState(false);
   const [dateTime, setDateTime] = useState(new Date());
   const router = useRouter();
   const { petId: qPetId } = useLocalSearchParams<{ petId?: string }>();
@@ -41,29 +42,36 @@ export default function AppointmentScheduleFormOwner({
   useEffect(() => {
     const fetchPets = async () => { try { const response = await axiosClient.get<Pet[]>('/api/pets'); setPets(response.data); } catch (err) { alertApiError(err, 'No se pudieron cargar las mascotas'); } };
     const fetchServices = async () => { try { const response = await axiosClient.get<Service[]>('/api/services'); setServices(response.data); } catch (err) { alertApiError(err, 'No se pudieron cargar los servicios'); } };
-    const fetchUsers = async () => { 
-      try { 
-        const res = await axiosClient.get<any[]>('/api/users'); 
-        setAllUsers(res.data);
-        // Inicialmente mostrar veterinarios
-        const vets = res.data.filter((u: any) => u.role === 'VETERINARIAN');
-        setFilteredStaff(vets);
-        setAssignedToId(vets.length ? vets[0].id : null);
-      } catch {} 
-    };
-    fetchPets(); fetchServices(); fetchUsers();
+    fetchPets(); fetchServices();
   }, []);
 
-  // Actualizar staff filtrado cuando cambia el servicio
+  // Cargar profesionales disponibles cuando cambia el servicio o la fecha/hora
   useEffect(() => {
-    if (serviceId && allUsers.length > 0) {
-      const selectedService = services.find(s => s.id === serviceId);
-      const staffRole = selectedService?.requiresVet ? 'VETERINARIAN' : 'EMPLOYEE';
-      const filtered = allUsers.filter(u => u.role === staffRole);
-      setFilteredStaff(filtered);
-      setAssignedToId(filtered.length ? filtered[0].id : null);
+    if (serviceId && dateTime) {
+      const loadAvailableProfessionals = async () => {
+        setLoadingStaff(true);
+        try {
+          const dateTimeIso = formatLocalDateTime(dateTime);
+          const response = await axiosClient.get<AvailableProfessional[]>(
+            `/api/appointments/available-professionals?serviceId=${serviceId}&dateTime=${dateTimeIso}`
+          );
+          const professionals = response.data.map(ap => ap.professional);
+          setFilteredStaff(professionals);
+          setAssignedToId(professionals.length ? professionals[0].id : null);
+        } catch (err) {
+          alertApiError(err, 'No se pudieron cargar los profesionales disponibles');
+          setFilteredStaff([]);
+          setAssignedToId(null);
+        } finally {
+          setLoadingStaff(false);
+        }
+      };
+      loadAvailableProfessionals();
+    } else {
+      setFilteredStaff([]);
+      setAssignedToId(null);
     }
-  }, [serviceId, allUsers, services]);
+  }, [serviceId, dateTime]);
 
   const handleSubmit = async () => {
     if (!selectedPetId || !serviceId || !assignedToId || !note) { Alert.alert('Por favor completa todos los campos.'); return; }

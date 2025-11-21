@@ -11,10 +11,10 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://vetcare-back-z6d9.onrender.com",
-        "API_URL_ANDROID": "https://vetcare-back-z6d9.onrender.com",
-        "API_URL_IOS": "https://vetcare-back-z6d9.onrender.com",
-        "API_URL_DEVICE": "https://vetcare-back-z6d9.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://api.vetcareservices.online",
+        "API_URL_ANDROID": "https://api.vetcareservices.online",
+        "API_URL_IOS": "https://api.vetcareservices.online",
+        "API_URL_DEVICE": "https://api.vetcareservices.online"
       }
     },
     "production": {

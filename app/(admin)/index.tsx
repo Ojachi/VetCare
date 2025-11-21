@@ -12,7 +12,8 @@ type AdminPath =
   | '/(admin)/services'
   | '/(admin)/admin-appointments'
   | '/(admin)/medical-records'
-  | '/(admin)/products';
+  | '/(admin)/products'
+  | '/(admin)/purchases';
 
 interface MenuItem {
   id: string;
@@ -71,6 +72,14 @@ const menuItems: MenuItem[] = [
     path: '/(admin)/products',
     description: 'Gestionar productos',
     borderColor: colors.primary,
+  },
+  {
+    id: '7',
+    label: 'Compras',
+    icon: '📦',
+    path: '/(admin)/purchases',
+    description: 'Ver compras del sistema',
+    borderColor: colors.success,
   },
 ];
 

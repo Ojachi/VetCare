@@ -40,6 +40,22 @@ const menuItems = [
     description: 'Compra productos'
   },
   { 
+    id: 'chat-ia',
+    label: 'Chat IA', 
+    path: '/(owner)/chat-ia', 
+    icon: '🤖',
+    color: '#3498db',
+    description: 'Asistente inteligente'
+  },
+  { 
+    id: 'compras',
+    label: 'Mis Compras', 
+    path: '/(owner)/compras', 
+    icon: '🛒',
+    color: '#e74c3c',
+    description: 'Historial de compras'
+  },
+  { 
     id: 'perfil',
     label: 'Mi Perfil', 
     path: '/(owner)/perfil', 
