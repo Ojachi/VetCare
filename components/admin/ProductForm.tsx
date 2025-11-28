@@ -1,4 +1,3 @@
-import * as FileSystem from 'expo-file-system';
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import axiosClient from '../../api/axiosClient';
@@ -14,14 +13,19 @@ type Category = {
   name: string;
 };
 
+type ImageAsset = {
+  uri: string;
+  type: string;
+  name: string;
+};
+
 export default function ProductForm({ product, onSaved, onCancel }: { product?: any | null; onSaved: (p: any) => void; onCancel: () => void }) {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState(product?.name ?? '');
   const [description, setDescription] = useState(product?.description ?? '');
   const [price, setPrice] = useState(product?.price ? String(product.price) : '');
   const [stock, setStock] = useState(product?.stock ? String(product.stock) : '');
-  const [image, setImage] = useState<string>(product?.image ?? '');
-  const [imageMimeType, setImageMimeType] = useState<string>('image/jpeg');
+  const [imageAsset, setImageAsset] = useState<ImageAsset | null>(null);
   const [previewUri, setPreviewUri] = useState<string | undefined>(undefined);
   const [descHeight, setDescHeight] = useState(100);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -33,11 +37,15 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
     setDescription(product?.description ?? '');
     setPrice(product?.price ? String(product.price) : '');
     setStock(product?.stock ? String(product.stock) : '');
-    setImage(product?.image ?? '');
+    setImageAsset(null);
     setSelectedCategoryId(product?.categoryId ?? null);
     if (product?.image) {
-      if (product.image.startsWith('data:') || product.image.startsWith('http')) setPreviewUri(product.image);
-      else setPreviewUri(`data:image/jpeg;base64,${product.image}`);
+      // Mostrar imagen de URL de Cloudinary
+      if (product.image.startsWith('http')) {
+        setPreviewUri(product.image);
+      } else {
+        setPreviewUri(undefined);
+      }
     } else {
       setPreviewUri(undefined);
     }
@@ -56,29 +64,23 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
   const { pickImage } = useImagePicker();
 
   const handlePickImage = async () => {
-    const res = await pickImage({ base64: true, allowsEditing: true, aspect: [4, 3], quality: 0.8 });
+    const res = await pickImage({ base64: false, allowsEditing: true, aspect: [4, 3], quality: 0.8 });
     if (res.canceled) {
       if (res.error) console.warn('Picker cancel/error:', res.error);
       return;
     }
     const asset = res.assets?.[0];
-    if (!asset) return;
-    const mimeType = asset.mimeType ?? 'image/jpeg';
-    if (asset.base64) {
-      setImage(asset.base64);
-      setImageMimeType(mimeType);
-      setPreviewUri(`data:${mimeType};base64,${asset.base64}`);
-    } else if (asset.uri) {
-      try {
-        const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: 'base64' as any });
-        setImage(base64);
-        setImageMimeType(mimeType);
-        setPreviewUri(`data:${mimeType};base64,${base64}`);
-      } catch (e) {
-        console.error('readAsStringAsync error', e);
-        Alert.alert('Error', 'No se pudo leer la imagen seleccionada');
-      }
-    }
+    if (!asset?.uri) return;
+    
+    const fileName = asset.uri.split('/').pop() || 'image.jpg';
+    const mimeType = asset.mimeType || 'image/jpeg';
+    
+    setImageAsset({
+      uri: asset.uri,
+      type: mimeType,
+      name: fileName,
+    });
+    setPreviewUri(asset.uri);
   };
 
   const onSubmit = async () => {
@@ -87,26 +89,39 @@ export default function ProductForm({ product, onSaved, onCancel }: { product?: 
       return;
     }
     setLoading(true);
-    const imageData = image
-      ? image.startsWith('data:')
-        ? image
-        : `data:${imageMimeType};base64,${image}`
-      : null;
-    const payload: any = { 
-      name, 
-      description, 
-      price: Number(price), 
-      stock: Number(stock), 
-      image: imageData,
-      ...(selectedCategoryId && { categoryId: selectedCategoryId })
-    };
     
     try {
+      const formData = new FormData();
+      
+      // Construir JSON del producto
+      const productData = {
+        name,
+        description,
+        price: Number(price),
+        stock: Number(stock),
+        ...(selectedCategoryId && { categoryId: selectedCategoryId }),
+      };
+      
+      formData.append('product', JSON.stringify(productData));
+      
+      // Agregar imagen si hay una nueva
+      if (imageAsset) {
+        formData.append('image', {
+          uri: imageAsset.uri,
+          type: imageAsset.type,
+          name: imageAsset.name,
+        } as any);
+      }
+      
       let res;
       if (product?.id) {
-        res = await axiosClient.put(`/api/products/${product.id}`, payload);
+        res = await axiosClient.put(`/api/products/${product.id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
       } else {
-        res = await axiosClient.post('/api/products', payload);
+        res = await axiosClient.post('/api/products', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
       }
       Alert.alert('Éxito', 'Producto guardado correctamente');
       onSaved(res.data);

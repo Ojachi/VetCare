@@ -3,6 +3,7 @@ import {
     ActivityIndicator,
     Alert,
     FlatList,
+    Image,
     StyleSheet,
     Text,
     View,
@@ -13,6 +14,7 @@ import DetailModal from '../../components/ui/DetailModal';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import { alertApiError } from '../../utils/apiError';
+import { ensureDataUri } from '../../utils/image';
 
 type PurchaseItem = {
   id: number;
@@ -21,6 +23,7 @@ type PurchaseItem = {
   quantity: number;
   unitPrice: string;
   subtotal: string;
+  productImage?: string;
 };
 
 type Purchase = {
@@ -250,6 +253,12 @@ export default function ComprasOwner() {
               {selectedPurchase.items.map((item, idx) => (
                 <View key={item.id}>
                   <View style={styles.itemRow}>
+                    {item.productImage && (
+                      <Image
+                        source={{ uri: ensureDataUri(item.productImage) }}
+                        style={styles.itemImage}
+                      />
+                    )}
                     <View style={styles.itemLeftSection}>
                       <Text style={[typography.body, { color: colors.darkGray, fontWeight: '600', marginBottom: 4 }]}>
                         {item.productName}
@@ -397,6 +406,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
+    gap: 10,
+  },
+  itemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 6,
+    backgroundColor: colors.lightGray,
   },
   itemLeftSection: {
     flex: 1,

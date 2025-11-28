@@ -5,9 +5,10 @@ import PetCard from './PetCard';
 type Pet = {
   id: number;
   name: string;
-  owner: { name: string };
   species: string;
   breed: string;
+  owner?: { id?: number; name: string; email?: string; role?: string; address?: string; phone?: string };
+  active?: boolean;
 };
 
 interface Props {

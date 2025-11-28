@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useCart } from '../../context/CartContext';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
+import { ensureDataUri } from '../../utils/image';
 import Button from '../ui/Button';
 
 export default function CartOwner({ onCheckout }: { onCheckout?: () => void }) {
@@ -46,6 +47,12 @@ export default function CartOwner({ onCheckout }: { onCheckout?: () => void }) {
         {items.map((item, idx) => (
           <View key={item.productId}>
             <View style={styles.cartItemRow}>
+              {item.image && (
+                <Image
+                  source={{ uri: ensureDataUri(item.image) }}
+                  style={styles.itemImage}
+                />
+              )}
               <View style={styles.itemDetails}>
                 <Text style={[typography.h3, { fontSize: 15, marginBottom: 4 }]}>{item.name}</Text>
                 <Text style={[typography.caption, { color: colors.secondary, fontWeight: '600' }]}>
@@ -152,6 +159,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 8,
     gap: 8,
+  },
+  itemImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    backgroundColor: colors.lightGray,
   },
   itemDetails: {
     flex: 1,

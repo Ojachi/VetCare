@@ -7,6 +7,7 @@ import { useSession } from '../../context/SessionContext';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import { alertApiError } from '../../utils/apiError';
+import { ensureDataUri } from '../../utils/image';
 
 export default function PublicProductDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -69,7 +70,7 @@ export default function PublicProductDetailPage() {
         {/* IMAGE */}
         <View style={styles.imageContainer}>
           {product.image ? (
-            <Image source={{ uri: product.image }} style={styles.image} />
+            <Image source={{ uri: ensureDataUri(product.image) }} style={styles.image} />
           ) : (
             <View style={[styles.image, styles.imagePlaceholder]}>
               <Ionicons name="image-outline" size={64} color={colors.muted} />

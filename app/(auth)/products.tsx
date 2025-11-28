@@ -8,6 +8,7 @@ import { useSession } from '../../context/SessionContext';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import { alertApiError } from '../../utils/apiError';
+import { ensureDataUri } from '../../utils/image';
 
 // Catálogo público: ver productos sin autenticación; acciones avanzadas requieren login.
 export default function PublicProductsCatalog() {
@@ -52,7 +53,7 @@ export default function PublicProductsCatalog() {
     >
       <View style={styles.imageContainer}>
         {item.image ? (
-          <Image source={{ uri: item.image }} style={styles.thumb} />
+          <Image source={{ uri: ensureDataUri(item.image) }} style={styles.thumb} />
         ) : (
           <View style={[styles.thumb, styles.thumbPlaceholder]}>
             <Ionicons name="image-outline" size={32} color={colors.muted} />

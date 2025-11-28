@@ -5,6 +5,7 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, S
 import axiosClient from '../../api/axiosClient';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
+import { BreedSelector } from '../common/BreedSelector';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import Input from '../ui/Input';
@@ -13,6 +14,12 @@ type EmployeeEditPetProps = {
   pet?: any;
   onSaved?: () => void;
   onCancel?: () => void;
+};
+
+type Species = {
+  id: number;
+  name: string;
+  active: boolean;
 };
 
 export default function EmployeeEditPet({ pet: initialPet, onSaved, onCancel }: EmployeeEditPetProps = {}) {
@@ -24,6 +31,7 @@ export default function EmployeeEditPet({ pet: initialPet, onSaved, onCancel }: 
   const [loadingPet, setLoadingPet] = useState(!initialPet);
   const [pet, setPet] = useState<any>(initialPet || null);
   const [owners, setOwners] = useState<any[]>([]);
+  const [species, setSpecies] = useState<Species[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -48,8 +56,17 @@ export default function EmployeeEditPet({ pet: initialPet, onSaved, onCancel }: 
         // ignore
       }
     };
-    load(); 
+    const fetchSpecies = async () => {
+      try {
+        const res = await axiosClient.get('/api/species');
+        setSpecies(Array.isArray(res.data) ? res.data : res.data.data || []);
+      } catch (err) {
+        console.error('Error loading species:', err);
+      }
+    };
+    load();
     fetchOwners();
+    fetchSpecies();
   }, [petId]);
 
   const onSave = async () => {
@@ -109,38 +126,65 @@ export default function EmployeeEditPet({ pet: initialPet, onSaved, onCancel }: 
             />
           </View>
 
-          {/* Species & Breed Row */}
-          <View style={styles.rowFields}>
-            <View style={[styles.fieldGroup, { flex: 1, marginRight: 8 }]}>
-              <Text style={styles.fieldLabel}>🦴 Especie</Text>
-              <Input 
-                placeholder="Especie" 
-                value={pet.species} 
-                onChangeText={(v) => setPet({ ...pet, species: v })}
-                style={styles.input}
+          {/* Species Selection */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>🦴 Especie</Text>
+            <View style={styles.pickerWrap}>
+              <Picker 
+                selectedValue={pet.speciesId || null}
+                onValueChange={(v) => {
+                  setPet({ ...pet, speciesId: v, breedId: null });
+                }}
+              >
+                <Picker.Item label="Selecciona especie" value={null} />
+                {species.map((s) => <Picker.Item key={s.id} label={s.name} value={s.id} />)}
+              </Picker>
+            </View>
+            <Text style={styles.orText}>ó</Text>
+            <Input 
+              placeholder="Ingresa especie personalizada" 
+              value={pet.customSpecies || ''} 
+              onChangeText={(v) => setPet({ ...pet, customSpecies: v })}
+              style={styles.input}
+            />
+          </View>
+
+          {/* Breed Selection */}
+          {pet.speciesId && (
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>🏷️ Raza (del catálogo)</Text>
+              <BreedSelector
+                speciesId={pet.speciesId}
+                selectedBreedId={pet.breedId || null}
+                onBreedSelect={(id, name) => setPet({ ...pet, breedId: id })}
+                placeholder="Selecciona raza..."
               />
             </View>
-            <View style={[styles.fieldGroup, { flex: 1 }]}>
-              <Text style={styles.fieldLabel}>🏷️ Raza</Text>
-              <Input 
-                placeholder="Raza" 
-                value={pet.breed} 
-                onChangeText={(v) => setPet({ ...pet, breed: v })}
-                style={styles.input}
-              />
-            </View>
+          )}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>ó Raza Personalizada</Text>
+            <Input 
+              placeholder="Raza personalizada" 
+              value={pet.customBreed || ''} 
+              onChangeText={(v) => setPet({ ...pet, customBreed: v })}
+              style={styles.input}
+            />
           </View>
 
           {/* Sex & Age Row */}
           <View style={styles.rowFields}>
             <View style={[styles.fieldGroup, { flex: 1, marginRight: 8 }]}>
               <Text style={styles.fieldLabel}>♂️ Género</Text>
-              <Input 
-                placeholder="Género" 
-                value={pet.sex} 
-                onChangeText={(v) => setPet({ ...pet, sex: v })}
-                style={styles.input}
-              />
+              <View style={styles.pickerWrap}>
+                <Picker 
+                  selectedValue={pet.sex || ''}
+                  onValueChange={(v) => setPet({ ...pet, sex: v })}
+                >
+                  <Picker.Item label="Selecciona género" value="" />
+                  <Picker.Item label="Macho" value="Macho" />
+                  <Picker.Item label="Hembra" value="Hembra" />
+                </Picker>
+              </View>
             </View>
             <View style={[styles.fieldGroup, { flex: 1 }]}>
               <Text style={styles.fieldLabel}>📅 Edad</Text>
@@ -274,6 +318,13 @@ const styles = StyleSheet.create({
     borderRadius: 10, 
     overflow: 'hidden',
     backgroundColor: colors.white,
+  },
+
+  orText: {
+    textAlign: 'center',
+    color: colors.muted,
+    marginVertical: 8,
+    fontSize: 12,
   },
 
   // Buttons

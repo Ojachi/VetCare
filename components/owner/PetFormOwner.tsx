@@ -1,3 +1,4 @@
+import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -5,10 +6,17 @@ import axiosClient from '../../api/axiosClient';
 import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import { alertApiError } from '../../utils/apiError';
+import { BreedSelector } from '../common/BreedSelector';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 
 type Mode = 'create' | 'edit';
+
+type Species = {
+  id: number;
+  name: string;
+  active: boolean;
+};
 
 export default function PetFormOwner({
   mode: propMode,
@@ -26,9 +34,19 @@ export default function PetFormOwner({
   const petId = propPetId || qPetId;
   const mode: Mode = propMode || (petId ? 'edit' : 'create');
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState<any>({ name: '', species: '', age: '', breed: '', weight: '', sex: '' });
+  const [form, setForm] = useState<any>({ name: '', speciesId: null, customSpecies: '', breedId: null, customBreed: '', age: '', weight: '', sex: '' });
+  const [species, setSpecies] = useState<Species[]>([]);
 
   useEffect(() => {
+    const fetchSpecies = async () => {
+      try {
+        const res = await axiosClient.get('/api/species');
+        setSpecies(Array.isArray(res.data) ? res.data : res.data.data || []);
+      } catch (err) {
+        console.error('Error loading species:', err);
+      }
+    };
+
     const load = async () => {
       if (mode === 'edit' && petId) {
         try {
@@ -36,8 +54,10 @@ export default function PetFormOwner({
           const p = res.data;
           setForm({
             name: p.name || '',
-            species: p.species || '',
-            breed: p.breed || '',
+            speciesId: p.speciesId || null,
+            customSpecies: p.customSpecies || '',
+            breedId: p.breedId || null,
+            customBreed: p.customBreed || p.breed || '',
             sex: p.sex || '',
             weight: p.weight ? String(p.weight) : '',
             age: p.age ? String(p.age) : '',
@@ -47,17 +67,41 @@ export default function PetFormOwner({
         }
       }
     };
+    
+    fetchSpecies();
     load();
   }, [mode, petId]);
 
   const onSubmit = async () => {
-    const { name, species, age, breed, weight, sex } = form;
-    if (!name || !species || !age || !breed || !weight || !sex) {
-      Alert.alert('Error', 'Por favor llena todos los campos');
+    const { name, speciesId, customSpecies, breedId, customBreed, age, weight, sex } = form;
+    if (!name || !age || !sex || !weight) {
+      Alert.alert('Error', 'Por favor llena todos los campos requeridos');
       return;
     }
+
+    // Validar que tenga especie O customSpecies
+    if (!speciesId && !customSpecies) {
+      Alert.alert('Error', 'Por favor selecciona una especie o ingresa una personalizada');
+      return;
+    }
+
+    // Validar que tenga raza O customBreed
+    if (!breedId && !customBreed) {
+      Alert.alert('Error', 'Por favor selecciona una raza o ingresa una personalizada');
+      return;
+    }
+
     setLoading(true);
-    const payload = { name, species, breed, age: Number(age), weight: Number(weight), sex };
+    const payload: any = {
+      name,
+      age: Number(age),
+      weight: Number(weight),
+      sex,
+      ...(speciesId && { speciesId }),
+      ...(customSpecies && { customSpecies }),
+      ...(breedId && { breedId }),
+      ...(customBreed && { customBreed }),
+    };
     try {
       if (mode === 'edit' && petId) {
         await axiosClient.put(`/api/pets/${petId}`, payload);
@@ -66,7 +110,7 @@ export default function PetFormOwner({
         else router.back();
       } else {
         const res = await axiosClient.post('/api/pets', payload, { headers: { 'Content-Type': 'application/json' } });
-        const createdId = res.data?.id || res.data?._id; // attempt to infer id
+        const createdId = res.data?.id || res.data?._id;
         Alert.alert('Éxito', `Mascota ${name} registrada`);
         if (onSaved && createdId) onSaved(String(createdId));
         else router.push('/(owner)/view-pets' as any);
@@ -106,34 +150,69 @@ export default function PetFormOwner({
 
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>🦴 Especie</Text>
-            <Input
-              placeholder="Ej. Perro, Gato, Conejo"
-              value={form.species}
-              onChangeText={(v) => setForm({ ...form, species: v })}
+            <View style={styles.pickerWrap}>
+              <Picker selectedValue={form.speciesId} onValueChange={(v) => { setForm({ ...form, speciesId: v, breedId: null }); }}>
+                <Picker.Item label="Selecciona especie" value={null} />
+                {species.map((s) => <Picker.Item key={s.id} label={s.name} value={s.id} />)}
+              </Picker>
+            </View>
+            <Text style={styles.orText}>ó</Text>
+            <Input 
+              placeholder="Ingresa especie personalizada" 
+              value={form.customSpecies} 
+              onChangeText={(v) => setForm({ ...form, customSpecies: v })}
               style={styles.input}
             />
           </View>
 
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>🏷️ Raza</Text>
-            <Input
-              placeholder="Ej. Golden Retriever, Siamés"
-              value={form.breed}
-              onChangeText={(v) => setForm({ ...form, breed: v })}
-              style={styles.input}
-            />
-          </View>
+          {/* Breed Selection */}
+          {form.speciesId && (
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>🏷️ Raza</Text>
+              <BreedSelector
+                speciesId={form.speciesId}
+                selectedBreedId={form.breedId}
+                onBreedSelect={(id, name) => {
+                  setForm({ ...form, breedId: id, customBreed: '' });
+                }}
+                placeholder="Selecciona raza del catálogo..."
+              />
+              {!form.breedId && (
+                <>
+                  <Text style={styles.orText}>ó ingresa una personalizada:</Text>
+                  <Input 
+                    placeholder="Ej: Labrador, Siamés" 
+                    value={form.customBreed} 
+                    onChangeText={(v) => setForm({ ...form, customBreed: v })}
+                    style={styles.input}
+                  />
+                </>
+              )}
+            </View>
+          )}
+          
+          {!form.speciesId && (
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>🏷️ Raza Personalizada</Text>
+              <Input 
+                placeholder="Labrador, Siamés, etc" 
+                value={form.customBreed} 
+                onChangeText={(v) => setForm({ ...form, customBreed: v })}
+                style={styles.input}
+              />
+            </View>
+          )}
 
           <View style={styles.rowFields}>
             <View style={[styles.fieldGroup, { flex: 1, marginRight: 8 }]}>
               <Text style={styles.fieldLabel}>⚧ Género</Text>
-              <Input
-                placeholder="M/H"
-                value={form.sex}
-                onChangeText={(v) => setForm({ ...form, sex: v })}
-                style={styles.input}
-                maxLength={1}
-              />
+              <View style={styles.pickerWrap}>
+                <Picker selectedValue={form.sex} onValueChange={(v) => setForm({ ...form, sex: v })}>
+                  <Picker.Item label="Selecciona género" value="" />
+                  <Picker.Item label="Macho" value="Macho" />
+                  <Picker.Item label="Hembra" value="Hembra" />
+                </Picker>
+              </View>
             </View>
 
             <View style={[styles.fieldGroup, { flex: 1 }]}>
@@ -227,6 +306,19 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 0,
+  },
+  pickerWrap: { 
+    borderWidth: 1, 
+    borderColor: colors.lightGray, 
+    borderRadius: 10, 
+    overflow: 'hidden',
+    backgroundColor: colors.white,
+  },
+  orText: {
+    textAlign: 'center',
+    color: colors.muted,
+    marginVertical: 8,
+    fontSize: 12,
   },
   buttonGroup: {
     gap: 10,

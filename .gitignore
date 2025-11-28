@@ -55,4 +55,5 @@ app-example
 
 .env
 
-ENDPOINTS_FULL.md
+*.md
+*.pdf

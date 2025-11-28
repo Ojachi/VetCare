@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import axiosClient from "../../api/axiosClient";
 import PetFormOwner from "../../components/owner/PetFormOwner";
@@ -20,11 +20,25 @@ import { alertApiError } from "../../utils/apiError";
 type Pet = {
   id: string;
   name: string;
-  species: string;
-  breed: string;
+  speciesId?: number;
+  speciesName?: string;
+  customSpecies?: string;
+  breedId?: number;
+  breedName?: string;
+  customBreed?: string;
   age: number;
   weight: number;
   sex: string;
+  owner?: {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    role: string;
+    active: boolean;
+  };
+  active?: boolean;
 };
 
 export default function MascotasOwner() {
@@ -79,6 +93,16 @@ export default function MascotasOwner() {
   const handlePetSaved = (petId: string) => {
     closeFormModal();
     loadPets();
+  };
+
+  // Helper para obtener especie
+  const getSpecies = (pet: Pet): string => {
+    return pet.speciesName || pet.customSpecies || 'Desconocida';
+  };
+
+  // Helper para obtener raza
+  const getBreed = (pet: Pet): string => {
+    return pet.breedName || pet.customBreed || 'Desconocida';
   };
 
   if (loading) {
@@ -137,8 +161,8 @@ export default function MascotasOwner() {
             <View style={styles.petCard}>
               <View style={styles.petIconContainer}>
                 <Text style={styles.petIcon}>
-                  {item.species.toLowerCase().includes("perro") ||
-                  item.species.toLowerCase().includes("dog")
+                  {getSpecies(item).toLowerCase().includes("perro") ||
+                  getSpecies(item).toLowerCase().includes("dog")
                     ? "🐕"
                     : "🐱"}
                 </Text>
@@ -153,7 +177,7 @@ export default function MascotasOwner() {
                     { marginTop: 4, color: colors.muted },
                   ]}
                 >
-                  {item.species} • {item.breed}
+                  {getSpecies(item)} • {getBreed(item)}
                 </Text>
                 <View style={styles.petDetails}>
                   <Text
@@ -193,8 +217,8 @@ export default function MascotasOwner() {
             <View style={styles.detailHeader}>
               <View style={styles.detailAvatarContainer}>
                 <Text style={styles.detailAvatar}>
-                  {selectedPet.species.toLowerCase().includes("perro") ||
-                  selectedPet.species.toLowerCase().includes("dog")
+                  {getSpecies(selectedPet).toLowerCase().includes("perro") ||
+                  getSpecies(selectedPet).toLowerCase().includes("dog")
                     ? "🐕"
                     : "🐱"}
                 </Text>
@@ -209,7 +233,7 @@ export default function MascotasOwner() {
                   {selectedPet.name}
                 </Text>
                 <Text style={[typography.body, { color: colors.muted }]}>
-                  {selectedPet.species} • {selectedPet.breed}
+                  {getSpecies(selectedPet)} • {getBreed(selectedPet)}
                 </Text>
               </View>
               <Text style={styles.detailGenderBadge}>
@@ -226,7 +250,7 @@ export default function MascotasOwner() {
                 <Text style={styles.detailInfoIcon}>🦴</Text>
                 <Text style={styles.detailInfoLabel}>Especie</Text>
                 <Text style={styles.detailInfoValue}>
-                  {selectedPet.species}
+                  {getSpecies(selectedPet)}
                 </Text>
               </View>
 
@@ -234,7 +258,7 @@ export default function MascotasOwner() {
               <View style={styles.detailInfoCard}>
                 <Text style={styles.detailInfoIcon}>🏷️</Text>
                 <Text style={styles.detailInfoLabel}>Raza</Text>
-                <Text style={styles.detailInfoValue}>{selectedPet.breed}</Text>
+                <Text style={styles.detailInfoValue}>{getBreed(selectedPet)}</Text>
               </View>
 
               {/* Edad */}
