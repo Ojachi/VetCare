@@ -7,8 +7,12 @@ import Card from '../ui/Card';
 type Pet = {
   id: number;
   name: string;
-  species: string;
-  breed: string;
+  speciesId?: number;
+  speciesName?: string;
+  customSpecies?: string;
+  breedId?: number;
+  breedName?: string;
+  customBreed?: string;
   owner?: { id?: number; name: string; email?: string; role?: string; address?: string; phone?: string };
   active?: boolean;
 };
@@ -19,25 +23,25 @@ type Props = {
 };
 
 export default function PetCard({ pet, onOpenDetail }: Props) {
-  const speciesIcon = (species: string): string => {
-    const icons: Record<string, string> = {
-      PERRO: '🐕',
-      GATO: '🐈',
-      PAJARO: '🐦',
-      CONEJO: '🐰',
-      HAMSTER: '🐹',
-    };
-    return icons[species?.toUpperCase()] || '🐾';
+  const speciesIcon = (speciesName?: string): string => {
+    if (!speciesName) return '🐾';
+    const lowerSpecies = speciesName.toLowerCase();
+    if (lowerSpecies.includes('perro') || lowerSpecies.includes('dog')) return '🐕';
+    if (lowerSpecies.includes('gato') || lowerSpecies.includes('cat')) return '🐈';
+    if (lowerSpecies.includes('pajaro') || lowerSpecies.includes('bird')) return '🐦';
+    if (lowerSpecies.includes('conejo') || lowerSpecies.includes('rabbit')) return '🐰';
+    if (lowerSpecies.includes('hamster')) return '🐹';
+    return '🐾';
   };
 
   return (
     <TouchableOpacity activeOpacity={0.85} onPress={() => onOpenDetail(pet)}>
       <Card style={[styles.card, { borderTopWidth: 4, borderTopColor: colors.primary }]}>
         <View style={styles.header}>
-          <Text style={styles.speciesIcon}>{speciesIcon(pet.species)}</Text>
+          <Text style={styles.speciesIcon}>{speciesIcon(pet.speciesName || pet.customSpecies)}</Text>
           <View style={styles.headerContent}>
             <Text style={[typography.h3, styles.name]}>{pet.name}</Text>
-            <Text style={styles.species}>{pet.species}</Text>
+            <Text style={styles.species}>{pet.speciesName || pet.customSpecies || 'Desconocida'}</Text>
           </View>
         </View>
 
@@ -52,7 +56,7 @@ export default function PetCard({ pet, onOpenDetail }: Props) {
           )}
           <View style={styles.infoRow}>
             <Text style={styles.infoIcon}>🏷️</Text>
-            <Text style={styles.infoText}>{pet.breed}</Text>
+            <Text style={styles.infoText}>{pet.breedName || pet.customBreed || 'Desconocida'}</Text>
           </View>
         </View>
       </Card>

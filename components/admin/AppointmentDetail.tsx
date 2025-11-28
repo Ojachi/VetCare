@@ -42,7 +42,7 @@ export default function AppointmentDetail({ appointment }: { appointment: any })
         <View style={styles.divider} />
         <View style={styles.infoRow}>
           <Text style={[typography.caption, { color: colors.muted }]}>Especie</Text>
-          <Text style={typography.body}>{pet?.species ?? '—'}</Text>
+          <Text style={typography.body}>{pet?.speciesName || pet?.customSpecies || '—'}</Text>
         </View>
       </Card>
 

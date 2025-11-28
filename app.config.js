@@ -6,10 +6,11 @@ export default {
     slug: "vetcare",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/favicon.png",
     scheme: "vetcare",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
+    assetBundlePatterns: ["**/*"],
     ios: {
       supportsTablet: true
     },

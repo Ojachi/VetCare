@@ -9,7 +9,22 @@ import Button from '../ui/Button';
 import Card from '../ui/Card';
 import EmptyState from '../ui/EmptyState';
 
-type Pet = { id: string; name: string; species: string; breed?: string; age?: number; weight?: number; sex?: string; };
+type Pet = {
+  id: string;
+  name: string;
+  speciesId?: number;
+  speciesName?: string;
+  customSpecies?: string;
+  breedId?: number;
+  breedName?: string;
+  customBreed?: string;
+  age?: number;
+  weight?: number;
+  sex?: string;
+};
+
+const getSpecies = (pet: Pet): string => pet.speciesName || pet.customSpecies || 'Desconocida';
+const getBreed = (pet: Pet): string => pet.breedName || pet.customBreed || 'Desconocida';
 
 export default function PetListOwner({
   onCreate,
@@ -52,10 +67,10 @@ export default function PetListOwner({
 
   const renderPet = ({ item }: { item: Pet }) => (
     <Card>
-  <TouchableOpacity onPress={() => (onOpenDetail ? onOpenDetail(item.id) : router.push({ pathname: '/(owner)/pet-detail', params: { petId: item.id } } as any))}>
+      <TouchableOpacity onPress={() => (onOpenDetail ? onOpenDetail(item.id) : router.push({ pathname: '/(owner)/pet-detail', params: { petId: item.id } } as any))}>
         <Text style={typography.h3}>{item.name}</Text>
-        <Text style={typography.body}>Especie: {item.species}</Text>
-        {item.breed && <Text style={typography.body}>Raza: {item.breed}</Text>}
+        <Text style={typography.body}>Especie: {getSpecies(item)}</Text>
+        {getBreed(item) && <Text style={typography.body}>Raza: {getBreed(item)}</Text>}
         {item.age !== undefined && <Text style={typography.body}>Edad: {item.age} años</Text>}
         {item.weight !== undefined && <Text style={typography.body}>Peso: {item.weight} Kg</Text>}
         {item.sex && <Text style={typography.body}>Género: {item.sex}</Text>}

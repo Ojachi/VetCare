@@ -86,13 +86,13 @@ export default function MedicalRecordDetail({ record }: { record: any }) {
           </View>
           <View style={styles.section}>
             <Text style={styles.label}>Especie</Text>
-            <Text style={styles.value}>{pet?.species ?? '—'}</Text>
+            <Text style={styles.value}>{pet?.speciesName || pet?.customSpecies || '—'}</Text>
           </View>
         </View>
         <View style={styles.twoColumnRow}>
           <View style={styles.section}>
             <Text style={styles.label}>Raza</Text>
-            <Text style={styles.value}>{pet?.breed ?? '—'}</Text>
+            <Text style={styles.value}>{pet?.breedName || pet?.customBreed || '—'}</Text>
           </View>
           <View style={styles.section}>
             <Text style={styles.label}>Sexo</Text>

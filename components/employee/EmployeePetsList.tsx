@@ -18,12 +18,16 @@ import EmployeeEditPet from './EmployeeEditPet';
 type Pet = {
   id: number;
   name: string;
-  species: string;
-  breed: string;
+  speciesId?: number;
+  speciesName?: string;
+  customSpecies?: string;
+  breedId?: number;
+  breedName?: string;
+  customBreed?: string;
   sex: string;
   age: number;
   weight: number;
-  ownerId: number;
+  ownerId?: number;
   owner?: { id: number; name: string };
 };
 
@@ -77,7 +81,7 @@ export default function EmployeePetsList() {
         <View style={styles.petInfo}>
           <Text style={[typography.h3, styles.petName]}>🐾 {item.name}</Text>
           <Text style={[typography.caption, { color: colors.muted, marginBottom: 4 }]}>
-            {item.species} • {item.breed}
+            {item.speciesName || item.customSpecies || 'Desconocida'} • {item.breedName || item.customBreed || 'Desconocida'}
           </Text>
           <View style={styles.petDetails}>
             <Text style={styles.petDetail}>♂️ {item.sex}</Text>

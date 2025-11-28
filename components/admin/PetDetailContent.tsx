@@ -4,29 +4,48 @@ import colors from '../../styles/colors';
 import typography from '../../styles/typography';
 import Card from '../ui/Card';
 
-const speciesIcon = (species: string): string => {
-  const icons: Record<string, string> = {
-    PERRO: '🐕',
-    GATO: '🐈',
-    PAJARO: '🐦',
-    CONEJO: '🐰',
-    HAMSTER: '🐹',
-  };
-  return icons[species?.toUpperCase()] || '🐾';
+type Pet = {
+  id: number;
+  name: string;
+  speciesId?: number;
+  speciesName?: string;
+  customSpecies?: string;
+  breedId?: number;
+  breedName?: string;
+  customBreed?: string;
+  age?: number;
+  weight?: number;
+  sex?: string;
+  owner?: any;
+  active?: boolean;
 };
 
-export default function PetDetailContent({ pet }: { pet: any }) {
+const speciesIcon = (speciesName: string): string => {
+  const icons: Record<string, string> = {
+    'Perro': '🐕',
+    'Gato': '🐈',
+    'Pájaro': '🐦',
+    'Conejo': '🐰',
+    'Hámster': '🐹',
+  };
+  return icons[speciesName] || '🐾';
+};
+
+export default function PetDetailContent({ pet }: { pet: Pet }) {
   if (!pet) return null;
+
+  const speciesDisplay = pet.speciesName || pet.customSpecies || 'Desconocida';
+  const breedDisplay = pet.breedName || pet.customBreed || 'Desconocida';
 
   return (
     <View style={styles.container}>
       {/* Header Card */}
       <Card style={styles.headerCard}>
         <View style={styles.headerContent}>
-          <Text style={styles.headerIcon}>{speciesIcon(pet.species)}</Text>
+          <Text style={styles.headerIcon}>{speciesIcon(speciesDisplay)}</Text>
           <View style={styles.headerText}>
             <Text style={[typography.h2, styles.name]}>{pet.name}</Text>
-            <Text style={styles.species}>{pet.species}</Text>
+            <Text style={styles.species}>{speciesDisplay}</Text>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: pet.active ? colors.success : colors.danger }]}>
             <Text style={styles.statusText}>{pet.active ? 'Activo' : 'Inactivo'}</Text>
@@ -41,7 +60,7 @@ export default function PetDetailContent({ pet }: { pet: any }) {
             <Text style={styles.infoIcon}>🏷️</Text>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Raza</Text>
-              <Text style={styles.infoValue}>{pet.breed}</Text>
+              <Text style={styles.infoValue}>{breedDisplay}</Text>
             </View>
           </View>
         </View>

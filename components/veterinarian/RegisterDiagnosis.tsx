@@ -104,7 +104,7 @@ export default function RegisterDiagnosis() {
                 {pets.map((p) => (
                   <Picker.Item 
                     key={p.id} 
-                    label={`${p.name} (${p.owner?.name || 'Propietario'})`} 
+                    label={`${p.name} - ${p.speciesName || p.customSpecies || 'Especie'} (${p.owner?.name || 'Propietario'})`} 
                     value={String(p.id)} 
                   />
                 ))}

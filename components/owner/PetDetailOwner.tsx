@@ -8,6 +8,23 @@ import { alertApiError } from '../../utils/apiError';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 
+type Pet = {
+  id: string;
+  name: string;
+  speciesId?: number;
+  speciesName?: string;
+  customSpecies?: string;
+  breedId?: number;
+  breedName?: string;
+  customBreed?: string;
+  age?: number;
+  weight?: number;
+  sex?: string;
+};
+
+const getSpecies = (pet: Pet): string => pet.speciesName || pet.customSpecies || 'Desconocida';
+const getBreed = (pet: Pet): string => pet.breedName || pet.customBreed || 'Desconocida';
+
 export default function PetDetailOwner({
   petId: propPetId,
   onEdit,
@@ -41,8 +58,8 @@ export default function PetDetailOwner({
     <View style={styles.container}>
       <Card>
         <Text style={[typography.h2, { marginBottom: 8 }]}>{pet.name}</Text>
-        <Text style={typography.body}>Especie: {pet.species}</Text>
-        {pet.breed && <Text style={typography.body}>Raza: {pet.breed}</Text>}
+        <Text style={typography.body}>Especie: {getSpecies(pet)}</Text>
+        {getBreed(pet) && <Text style={typography.body}>Raza: {getBreed(pet)}</Text>}
         {pet.age !== undefined && <Text style={typography.body}>Edad: {pet.age} años</Text>}
         {pet.weight !== undefined && <Text style={typography.body}>Peso: {pet.weight} Kg</Text>}
         {pet.sex && <Text style={typography.body}>Género: {pet.sex}</Text>}

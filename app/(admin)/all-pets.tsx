@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    StyleSheet,
+    Text,
+    View,
 } from 'react-native';
 import axiosClient from '../../api/axiosClient';
 import EditPetBreedForm from '../../components/admin/EditPetBreedForm';
@@ -111,7 +111,7 @@ export default function AllPets() {
         {selectedPet ? (
           <EditPetBreedForm
             petId={selectedPet.id}
-            currentBreed={selectedPet.breed}
+            currentBreed={selectedPet.breedName || selectedPet.customBreed}
             onCancel={() => setBreedModalVisible(false)}
             onSaved={(newBreed: string) => handleBreedSaved(selectedPet.id, newBreed)}
           />
